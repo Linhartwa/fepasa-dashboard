@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SVG Tasa de Carga</title>
+</head>
+<body style="margin:0; background:#ffffff;">
+<script>
+  // Obtener parámetros de la URL
+  const params = new URLSearchParams(window.location.search);
+  const andes = Number(params.get("andes")) || 0;
+  const pacifico = Number(params.get("pacifico")) || 0;
+  const l3 = Number(params.get("l3")) || 0;
+  const max = Number(params.get("max")) || 100;
+
+  // SVG dinámico
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="420" height="240" viewBox="0 0 420 240">
+    <style>
+      .lbl { font-family: Arial; font-size: 13px; fill: #444; }
+      .val { font-family: Arial; font-size: 14px; font-weight: bold; fill: #111; }
+    </style>
+
+    <rect width="100%" height="100%" fill="#ffffff"/>
+    <text x="20" y="25" class="lbl">TASA DE CARGA PROMEDIO (car/h)</text>
+
+    <!-- Línea Andes -->
+    <rect x="20" y="50" width="${(andes / max) * 350}" height="25" fill="#2ecc71"/>
+    <text x="20" y="45" class="lbl">Andes</text>
+    <text x="${(andes / max) * 350 + 30}" y="68" class="val">${andes}</text>
+
+    <!-- Línea Pacífico -->
+    <rect x="20" y="100" width="${(pacifico / max) * 350}" height="25" fill="#3498db"/>
+    <text x="20" y="95" class="lbl">Pacífico</text>
+    <text x="${(pacifico / max) * 350 + 30}" y="118" class="val">${pacifico}</text>
+
+    <!-- Línea 3 -->
+    <rect x="20" y="150" width="${(l3 / max) * 350}" height="25" fill="#f39c12"/>
+    <text x="20" y="145" class="lbl">Línea 3</text>
+    <text x="${(l3 / max) * 350 + 30}" y="168" class="val">${l3}</text>
+  </svg>
+  `;
+
+  document.write(svg);
+</script>
+</body>
+</html>
