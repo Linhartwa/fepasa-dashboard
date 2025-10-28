@@ -27,16 +27,22 @@
       font-weight: 500;
       letter-spacing: 0.5px;
     }
+    nav {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
     nav a {
       color: white;
       text-decoration: none;
-      margin-left: 25px;
       font-size: 15px;
       font-weight: bold;
       position: relative;
+      transition: 0.3s;
     }
     nav a:hover {
       text-decoration: underline;
+      color: #FFB600;
     }
     nav a.active {
       border-bottom: 3px solid #FFB600;
@@ -45,8 +51,9 @@
     iframe {
       border: none;
       width: 100%;
-      height: calc(100vh - 75px);
+      height: calc(100vh - 80px);
       background-color: #ffffff;
+      transition: opacity 0.5s ease;
     }
     footer {
       position: fixed;
@@ -77,30 +84,32 @@
     <h1>Dashboard Operacional FEPASA</h1>
   </div>
   <nav>
-    <a href="svg_tasa.html" target="panel" class="active">Tasa de Carga</a>
-    <a href="svg_tiempo.html" target="panel">Tiempos de Proceso</a>
-    <a href="https://appsheet.com/start/04f7bf47-3b74-4b82-a433-e6ac3e6b4199" target="_blank">Abrir AppSheet</a>
+    <a href="svg_tasa.html" target="panel" class="active">📊 Tasa de Carga</a>
+    <a href="svg_tiempo.html" target="panel">⏱ Tiempos de Proceso</a>
+    <a href="https://appsheet.com/start/04f7bf47-3b74-4b82-a433-e6ac3e6b4199" target="_blank">📱 AppSheet</a>
   </nav>
 </header>
 
-<iframe name="panel" src="svg_tasa.html"></iframe>
+<iframe name="panel" src="svg_tasa.html" id="iframePanel"></iframe>
 
 <footer>
-  © 2025 FEPASA — Gerencia de Operaciones 🚂 | Linhart Ketterer
+  © 2025 FEPASA — Gerencia de Operaciones 🚂 | Dashboard desarrollado por Linhart Ketterer
 </footer>
 
 <script>
-  // Resalta el enlace activo del menú
   const links = document.querySelectorAll("nav a");
+  const iframe = document.getElementById("iframePanel");
+
+  // Cambiar enlace activo al hacer clic
   links.forEach(link => {
     link.addEventListener("click", () => {
       links.forEach(l => l.classList.remove("active"));
       link.classList.add("active");
+      iframe.style.opacity = "0";
+      setTimeout(() => { iframe.style.opacity = "1"; }, 200);
     });
   });
 </script>
 
 </body>
 </html>
-
-
