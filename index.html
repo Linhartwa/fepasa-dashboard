@@ -1,172 +1,71 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard FEPASA</title>
-<style>
-body {
-  font-family: "Segoe UI", Arial;
-  background: #f6f8fa;
-  padding: 20px;
-}
-h1 { text-align:center; color:#1e88e5; }
-.filtros { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
-select, input { padding:6px 8px; border:1px solid #ccc; border-radius:6px; min-width:130px; }
-svg { display:block; margin:30px auto; background:white; border:1px solid #ddd; }
-table { width:90%; margin:auto; border-collapse:collapse; background:white; }
-th,td { border:1px solid #ddd; padding:8px; text-align:center; }
-th { background:#1e88e5; color:white; }
-.footer { text-align:center; margin-top:25px; font-size:13px; color:#666; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FEPASA Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      color: #333;
+    }
+    header {
+      background-color: #003366;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+      font-weight: normal;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    iframe {
+      border: none;
+      width: 100%;
+      height: calc(100vh - 70px);
+    }
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      padding: 10px;
+      background-color: #e9ecef;
+    }
+  </style>
 </head>
 <body>
-<h1>🚂 Dashboard Operacional FEPASA</h1>
 
-<div class="filtros">
-  <label>Desde: <input type="date" id="desde"></label>
-  <label>Hasta: <input type="date" id="hasta"></label>
-  <label>Tren: <select id="tren"></select></label>
-  <label>Línea:
-    <select id="linea">
-      <option value="">Todas</option>
-      <option value="2">Línea 2</option>
-      <option value="3">Línea 3</option>
-    </select>
-  </label>
-  <label>Subtrenada: <select id="subtrenada"></select></label>
-  <label>Cierre: <select id="cierre"></select></label>
-  <button onclick="cargarDatos()">🔄 Actualizar</button>
-</div>
+<header>
+  <h1>📊 Dashboard Operacional - FEPASA</h1>
+  <nav>
+    <a href="svg_tasa.html" target="iframe">Tasa de Carga</a>
+    <a href="svg_tiempo.html" target="iframe">Tiempos de Proceso</a>
+    <a href="https://appsheet.com/start/04f7bf47-3b74-4b82-a433-e6ac3e6b4199" target="_blank">Abrir AppSheet</a>
+  </nav>
+</header>
 
-<svg id="grafico" width="900" height="400"></svg>
+<iframe name="iframe" src="svg_tasa.html"></iframe>
 
-<table id="tabla">
-  <thead>
-    <tr>
-      <th>Subtrenada</th>
-      <th>Línea</th>
-      <th>Tasa Real</th>
-      <th>Tasa Diseño</th>
-      <th>Diferencia (%)</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<footer>
+  © 2025 FEPASA - Departamento de Operaciones 🚂
+</footer>
 
-<div class="footer">
-📤 Datos cargados directamente desde AppSheet - Operaciones FEPASA
-</div>
-
-<script>
-const APP_ID = "04f7bf47-3b74-4b82-a433-e6ac3e6b4199";
-const TABLA = "REGISTROS REALES";
-
-async function cargarDatos() {
-  const apiKey = prompt("🔑 Ingresa tu API Key de AppSheet (solo local, no se guarda):");
-  if (!apiKey) return alert("Sin clave no puedo acceder a los datos.");
-
-  const url = `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/${encodeURIComponent(TABLA)}/Action`;
-  const body = { "Action": "Find", "Properties": {}, "Rows": [] };
-
-  try {
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "ApplicationAccessKey": apiKey
-      },
-      body: JSON.stringify(body)
-    });
-
-    const datos = await resp.json();
-    inicializarFiltros(datos);
-    actualizarDashboard(datos);
-  } catch (err) {
-    console.error(err);
-    alert("Error al conectar con AppSheet");
-  }
-}
-
-function inicializarFiltros(datos) {
-  const trenSel = document.getElementById("tren");
-  const subtSel = document.getElementById("subtrenada");
-  const cierreSel = document.getElementById("cierre");
-
-  trenSel.innerHTML = "<option value=''>Todos</option>";
-  subtSel.innerHTML = "<option value=''>Todas</option>";
-  cierreSel.innerHTML = "<option value=''>Todas</option>";
-
-  const trenes = [...new Set(datos.map(d => d.Tren))];
-  const subs = [...new Set(datos.map(d => d["Subtrenada planificada"]))];
-  const cierres = [...new Set(datos.map(d => d["Fecha y hora de cierre"]))];
-
-  trenes.forEach(t => trenSel.innerHTML += `<option>${t}</option>`);
-  subs.forEach(s => subtSel.innerHTML += `<option>${s}</option>`);
-  cierres.forEach(c => cierreSel.innerHTML += `<option>${c}</option>`);
-}
-
-function actualizarDashboard(datos) {
-  const tren = document.getElementById("tren").value;
-  const linea = document.getElementById("linea").value;
-  const sub = document.getElementById("subtrenada").value;
-  const cierre = document.getElementById("cierre").value;
-  const desde = document.getElementById("desde").value;
-  const hasta = document.getElementById("hasta").value;
-
-  let filtrados = datos;
-
-  if (tren) filtrados = filtrados.filter(d => d.Tren === tren);
-  if (linea) filtrados = filtrados.filter(d => d.Línea === linea);
-  if (sub) filtrados = filtrados.filter(d => d["Subtrenada planificada"] === sub);
-  if (cierre) filtrados = filtrados.filter(d => d["Fecha y hora de cierre"] === cierre);
-  if (desde) filtrados = filtrados.filter(d => new Date(d["Fecha"]) >= new Date(desde));
-  if (hasta) filtrados = filtrados.filter(d => new Date(d["Fecha"]) <= new Date(hasta));
-
-  dibujarGrafico(filtrados);
-  actualizarTabla(filtrados);
-}
-
-function dibujarGrafico(datos) {
-  const svg = document.getElementById("grafico");
-  svg.innerHTML = "";
-  const baseY = 350, margenX = 80;
-  const escala = v => (v / 8) * 250;
-
-  svg.innerHTML += `<line x1="${margenX}" y1="${baseY}" x2="850" y2="${baseY}" stroke="#000"/>`;
-  svg.innerHTML += `<line x1="${margenX}" y1="100" x2="${margenX}" y2="${baseY}" stroke="#000"/>`;
-
-  datos.forEach((d, i) => {
-    const x = margenX + i * 100;
-    const color = d.Línea === "2" ? "#1e88e5" : "#f6b000";
-    const tasa = d.Línea === "2" ? d["Tasa de carga L2"] : d["Tasa de carga L3"];
-    const y = baseY - escala(tasa);
-    svg.innerHTML += `
-      <rect x="${x}" y="${y}" width="60" height="${escala(tasa)}" fill="${color}" rx="4"/>
-      <text x="${x + 30}" y="${y - 8}" font-size="12" text-anchor="middle">${tasa}</text>
-      <text x="${x + 30}" y="${baseY + 15}" font-size="12" text-anchor="middle">${d["Subtrenada planificada"]}</text>
-    `;
-  });
-}
-
-function actualizarTabla(datos) {
-  const tbody = document.querySelector("#tabla tbody");
-  tbody.innerHTML = "";
-  datos.forEach(d => {
-    const tasa = d.Línea === "2" ? d["Tasa de carga L2"] : d["Tasa de carga L3"];
-    const tasaDis = d.Línea === "2" ? 5.45 : 7.11;
-    const diff = ((tasa / tasaDis) * 100 - 100).toFixed(1);
-    tbody.innerHTML += `
-      <tr>
-        <td>${d["Subtrenada planificada"]}</td>
-        <td>${d.Línea}</td>
-        <td>${tasa}</td>
-        <td>${tasaDis}</td>
-        <td>${diff}%</td>
-      </tr>
-    `;
-  });
-}
-</script>
 </body>
 </html>
+
