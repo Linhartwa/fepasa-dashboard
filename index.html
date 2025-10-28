@@ -152,7 +152,8 @@ const table = "REGISTROS REALES";
 
 // --- CONSULTA DATOS DESDE APPSHEET ---
 async function obtenerDatosDesdeAppSheet() {
-  const url = `https://api.appsheet.com/api/v2/apps/${appId}/tables/${encodeURIComponent(table)}/records`;
+  const url = `https://fepasa-proxy.onrender.com/api/appsheet`;
+
   
   const response = await fetch(url, {
     method: "GET",
