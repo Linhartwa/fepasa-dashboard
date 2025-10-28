@@ -3,37 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tasa de Carga por Subtrenada</title>
+<title>Tasa de Carga - FEPASA</title>
 <style>
   body {
-    background: #fff;
-    font-family: Arial, sans-serif;
+    background-color: #f8f9fb;
+    font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
     padding: 0;
   }
   svg {
     width: 100%;
-    height: 300px;
+    height: 420px;
+  }
+  .axis-label {
+    font-size: 13px;
+    fill: #333;
+    font-weight: bold;
+  }
+  .tick {
+    stroke: #ccc;
+    stroke-dasharray: 2;
+  }
+  .value {
+    font-size: 12px;
+    fill: #111;
+    text-anchor: middle;
   }
   .label {
     font-size: 12px;
     fill: #333;
     text-anchor: middle;
   }
-  .value {
-    font-size: 11px;
-    fill: #000;
+  .title {
+    font-size: 16px;
+    font-weight: 600;
+    fill: #222;
     text-anchor: middle;
   }
-  .linea-diseno {
-    stroke-dasharray: 4;
-    stroke-width: 2;
+  .resumen {
+    font-size: 12px;
+    fill: #444;
   }
 </style>
 </head>
 <body>
 
-<svg id="grafico" viewBox="0 0 600 320"></svg>
+<svg id="grafico" viewBox="0 0 700 420"></svg>
 
 <script>
 function getParam(name) {
@@ -41,51 +56,85 @@ function getParam(name) {
   return params.get(name);
 }
 
-// Recibe los parámetros de AppSheet (listas separadas por coma)
 const subtrenadas = (getParam("subtrenada_planificada") || "").split(",");
 const tasasL2 = (getParam("tasaL2") || "").split(",");
 const tasasL3 = (getParam("tasaL3") || "").split(",");
 const lineas = (getParam("linea") || "").split(",");
+const tren = getParam("tren") || "";
+const desde = getParam("desde") || "";
+const hasta = getParam("hasta") || "";
 
 const svg = document.getElementById("grafico");
-const baseY = 260;
-const maxTasa = 10; // escala general de referencia
-const escala = v => (v / maxTasa) * 200;
+const baseY = 340;
+const leftMargin = 80;
+const maxTasa = 10;
+const escala = v => (v / maxTasa) * 250;
+
+// Título
+svg.innerHTML += `<text x="350" y="30" class="title">Tasa de Carga — Tren ${tren} (${desde} a ${hasta})</text>`;
+
+// Líneas horizontales (Eje Y)
+for (let i = 0; i <= maxTasa; i += 1) {
+  const y = baseY - escala(i);
+  svg.innerHTML += `<line x1="${leftMargin}" y1="${y}" x2="640" y2="${y}" class="tick"/>`;
+  svg.innerHTML += `<text x="${leftMargin - 15}" y="${y + 4}" font-size="11" fill="#555" text-anchor="end">${i}</text>`;
+}
 
 // Líneas de diseño
 svg.innerHTML += `
-  <line x1="40" y1="${baseY - escala(5.45)}" x2="560" y2="${baseY - escala(5.45)}" stroke="blue" class="linea-diseno" />
-  <text x="565" y="${baseY - escala(5.45) + 4}" font-size="11" fill="blue">Diseño L2 (5.45)</text>
+  <line x1="${leftMargin}" y1="${baseY - escala(5.45)}" x2="640" y2="${baseY - escala(5.45)}" stroke="blue" stroke-dasharray="4"/>
+  <text x="645" y="${baseY - escala(5.45) + 4}" font-size="11" fill="blue">Diseño L2 (5.45)</text>
 
-  <line x1="40" y1="${baseY - escala(7.11)}" x2="560" y2="${baseY - escala(7.11)}" stroke="orange" class="linea-diseno" />
-  <text x="565" y="${baseY - escala(7.11) + 4}" font-size="11" fill="orange">Diseño L3 (7.11)</text>
+  <line x1="${leftMargin}" y1="${baseY - escala(7.11)}" x2="640" y2="${baseY - escala(7.11)}" stroke="orange" stroke-dasharray="4"/>
+  <text x="645" y="${baseY - escala(7.11) + 4}" font-size="11" fill="orange">Diseño L3 (7.11)</text>
 `;
 
-// Dibujar las barras por subtrenada
+// Barras
+let totalL2 = 0, totalL3 = 0, countL2 = 0, countL3 = 0;
 subtrenadas.forEach((st, i) => {
-  const x = 60 + i * 80;
+  const x = leftMargin + 50 + i * 90;
   const linea = (lineas[i] || "").trim();
-  let tasa = 0, color = "gray";
+  let tasa = 0, color = "#888";
 
   if (linea === "2") {
     tasa = parseFloat(tasasL2[i]) || 0;
-    color = "blue";
+    color = "#1e88e5";
+    totalL2 += tasa; countL2++;
   } else if (linea === "3") {
     tasa = parseFloat(tasasL3[i]) || 0;
-    color = "orange";
+    color = "#f6b000";
+    totalL3 += tasa; countL3++;
   }
 
   const altura = escala(tasa);
   const y = baseY - altura;
 
   svg.innerHTML += `
-    <rect x="${x}" y="${y}" width="50" height="${altura}" fill="${color}" rx="4"/>
-    <text x="${x + 25}" y="${y - 8}" class="value">${tasa.toFixed(2)} h</text>
-    <text x="${x + 25}" y="${baseY + 15}" class="label">${st}</text>
+    <rect x="${x}" y="${y}" width="60" height="${altura}" fill="${color}" rx="4"/>
+    <text x="${x + 30}" y="${y - 6}" class="value">${tasa.toFixed(2)} h</text>
+    <text x="${x + 30}" y="${baseY + 20}" class="label">${st}</text>
   `;
 });
+
+// Ejes
+svg.innerHTML += `
+  <line x1="${leftMargin}" y1="90" x2="${leftMargin}" y2="${baseY}" stroke="#000" stroke-width="1.2"/>
+  <line x1="${leftMargin}" y1="${baseY}" x2="640" y2="${baseY}" stroke="#000" stroke-width="1.2"/>
+  <text x="35" y="200" class="axis-label" transform="rotate(-90 35,200)">Tasa de carga (carros/hora)</text>
+  <text x="370" y="${baseY + 50}" class="axis-label">Subtrenadas planificadas</text>
+`;
+
+// Promedios resumen
+const avgL2 = countL2 ? (totalL2 / countL2).toFixed(2) : "0.00";
+const avgL3 = countL3 ? (totalL3 / countL3).toFixed(2) : "0.00";
+svg.innerHTML += `
+  <rect x="460" y="360" width="180" height="45" fill="#fff" stroke="#ccc" rx="6"/>
+  <text x="470" y="378" class="resumen">Promedio L2: ${avgL2} h</text>
+  <text x="470" y="395" class="resumen">Promedio L3: ${avgL3} h</text>
+`;
 </script>
 
 </body>
 </html>
+
 
