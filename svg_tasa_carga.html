@@ -4,16 +4,21 @@
 <meta charset="UTF-8">
 <title>Tasa de Carga — FEPASA</title>
 <style>
-  body { margin: 0; background: white; font-family: Arial, sans-serif; }
+  body {
+    margin: 0;
+    background: white;
+    font-family: Arial, sans-serif;
+  }
   text { fill: #222; font-size: 12px; }
   .axis { stroke: #ccc; stroke-width: 1; }
   .linea { stroke-width: 2; stroke-dasharray: 4; }
   .azul { fill: #0077FF; }
   .amarillo { fill: #FFD200; }
+  .valor { font-weight: bold; font-size: 11px; fill: #000; }
 </style>
 </head>
 <body>
-<svg id="grafico" width="600" height="320" xmlns="http://www.w3.org/2000/svg">
+<svg id="grafico" width="640" height="340" xmlns="http://www.w3.org/2000/svg">
   <text x="20" y="30" font-size="16" font-weight="bold">Cargando datos...</text>
 </svg>
 
@@ -25,7 +30,7 @@ const p = new URLSearchParams(window.location.search);
 const desde = p.get("desde") || "-";
 const hasta = p.get("hasta") || "-";
 const tren = p.get("tren") || "-";
-const subtrenadas = (p.get("subtrenada") || "").split(",");
+const subtrenadas = (p.get("subtrenada") || "").split(",").filter(s => s.trim() !== "");
 const tasaL2 = parseFloat(p.get("tasaL2") || 0);
 const tasaL3 = parseFloat(p.get("tasaL3") || 0);
 
@@ -35,42 +40,52 @@ const disenoL3 = 7.11;
 
 // 🔹 Configuración gráfica
 const maxY = 10;
-const anchoBarra = 40;
+const baseY = 260;
+const anchoBarra = 35;
 const separacion = 100;
-const baseY = 250;
+const escala = 20; // 1 unidad = 20px en el eje Y
 
+// 🔹 Generar SVG dinámico
 svg.innerHTML = `
   <text x="20" y="25" font-size="16" font-weight="bold">Tasa de Carga Promedio — Tren ${tren}</text>
-  <text x="20" y="45">Desde: ${desde} | Hasta: ${hasta}</text>
+  <text x="20" y="45" font-size="12">Desde: ${desde} | Hasta: ${hasta}</text>
 
   <!-- Eje Y -->
   <line x1="40" y1="50" x2="40" y2="${baseY}" class="axis" />
   <line x1="40" y1="${baseY}" x2="${(subtrenadas.length*separacion)+60}" y2="${baseY}" class="axis" />
 
   <!-- Líneas de diseño -->
-  <line x1="40" y1="${baseY - disenoL2*20}" x2="${(subtrenadas.length*separacion)+60}" y2="${baseY - disenoL2*20}" class="linea" stroke="#0077FF"/>
-  <text x="${(subtrenadas.length*separacion)+65}" y="${baseY - disenoL2*20+4}" fill="#0077FF" font-size="10">L2 Diseño (5.45)</text>
+  <line x1="40" y1="${baseY - disenoL2*escala}" x2="${(subtrenadas.length*separacion)+60}" y2="${baseY - disenoL2*escala}" class="linea" stroke="#0077FF"/>
+  <text x="${(subtrenadas.length*separacion)+70}" y="${baseY - disenoL2*escala + 4}" fill="#0077FF" font-size="10">L2 Diseño (5.45)</text>
 
-  <line x1="40" y1="${baseY - disenoL3*20}" x2="${(subtrenadas.length*separacion)+60}" y2="${baseY - disenoL3*20}" class="linea" stroke="#FFD200"/>
-  <text x="${(subtrenadas.length*separacion)+65}" y="${baseY - disenoL3*20+4}" fill="#FFD200" font-size="10">L3 Diseño (7.11)</text>
+  <line x1="40" y1="${baseY - disenoL3*escala}" x2="${(subtrenadas.length*separacion)+60}" y2="${baseY - disenoL3*escala}" class="linea" stroke="#FFD200"/>
+  <text x="${(subtrenadas.length*separacion)+70}" y="${baseY - disenoL3*escala + 4}" fill="#FFD200" font-size="10">L3 Diseño (7.11)</text>
 
   <!-- Barras dinámicas -->
   ${subtrenadas.map((s, i) => `
-    <rect x="${60 + i*separacion}" y="${baseY - tasaL2*20}" width="${anchoBarra}" height="${tasaL2*20}" class="azul"/>
-    <rect x="${60 + i*separacion + anchoBarra + 5}" y="${baseY - tasaL3*20}" width="${anchoBarra}" height="${tasaL3*20}" class="amarillo"/>
-    <text x="${60 + i*separacion + 10}" y="${baseY + 15}" font-size="11">${s}</text>
+    <!-- L2 -->
+    <rect x="${60 + i*separacion}" y="${baseY - tasaL2*escala}" width="${anchoBarra}" height="${tasaL2*escala}" class="azul"/>
+    <text x="${60 + i*separacion + anchoBarra/2 - 8}" y="${baseY - tasaL2*escala - 5}" class="valor">${tasaL2.toFixed(2)}</text>
+
+    <!-- L3 -->
+    <rect x="${60 + i*separacion + anchoBarra + 5}" y="${baseY - tasaL3*escala}" width="${anchoBarra}" height="${tasaL3*escala}" class="amarillo"/>
+    <text x="${60 + i*separacion + anchoBarra + 5 + anchoBarra/2 - 8}" y="${baseY - tasaL3*escala - 5}" class="valor">${tasaL3.toFixed(2)}</text>
+
+    <!-- Etiquetas -->
+    <text x="${60 + i*separacion + 15}" y="${baseY + 18}" font-size="11">${s}</text>
   `).join("")}
 
   <!-- Leyenda -->
-  <rect x="60" y="280" width="10" height="10" fill="#0077FF"/>
-  <text x="75" y="289">Tasa L2</text>
-  <rect x="150" y="280" width="10" height="10" fill="#FFD200"/>
-  <text x="165" y="289">Tasa L3</text>
-  <line x1="240" y1="285" x2="250" y2="285" stroke="#0077FF" stroke-width="2" stroke-dasharray="4"/>
-  <text x="255" y="289">Diseño L2 (5.45)</text>
-  <line x1="360" y1="285" x2="370" y2="285" stroke="#FFD200" stroke-width="2" stroke-dasharray="4"/>
-  <text x="375" y="289">Diseño L3 (7.11)</text>
+  <rect x="60" y="300" width="10" height="10" fill="#0077FF"/>
+  <text x="75" y="309">Tasa L2</text>
+  <rect x="150" y="300" width="10" height="10" fill="#FFD200"/>
+  <text x="165" y="309">Tasa L3</text>
+  <line x1="240" y1="305" x2="250" y2="305" stroke="#0077FF" stroke-width="2" stroke-dasharray="4"/>
+  <text x="255" y="309">Diseño L2 (5.45)</text>
+  <line x1="360" y1="305" x2="370" y2="305" stroke="#FFD200" stroke-width="2" stroke-dasharray="4"/>
+  <text x="375" y="309">Diseño L3 (7.11)</text>
 `;
 </script>
 </body>
 </html>
+
