@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard FEPASA - Tasa de Carga</title>
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f7f8fa;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #1e88e5;
+  }
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  label {
+    font-weight: 600;
+    color: #333;
+  }
+  select, input {
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-width: 150px;
+  }
+  svg {
+    display: block;
+    margin: 30px auto;
+    background-color: #fff;
+    border: 1px solid #ccc;
+  }
+  table {
+    width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  th, td {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 8px;
+  }
+  th {
+    background-color: #1e88e5;
+    color: white;
+  }
+  .footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 13px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<h1>🚂 Dashboard Operacional FEPASA</h1>
+
+<!-- Filtros -->
+<div class="filtros">
+  <label>Desde: <input type="date" id="desde"></label>
+  <label>Hasta: <input type="date" id="hasta"></label>
+  <label>Tren:
+    <select id="tren"></select>
+  </label>
+  <label>Línea:
+    <select id="linea">
+      <option value="">Todas</option>
+      <option value="2">Línea 2</option>
+      <option value="3">Línea 3</option>
+    </select>
+  </label>
+  <label>Subtrenada:
+    <select id="subtrenada"></select>
+  </label>
+  <label>Cierre:
+    <select id="cierre"></select>
+  </label>
+  <button onclick="actualizarDashboard()">🔄 Actualizar</button>
+</div>
+
+<!-- Gráfico SVG -->
+<svg id="grafico" width="900" height="400"></svg>
+
+<!-- Tabla resumen -->
+<table id="tabla">
+  <thead>
+    <tr>
+      <th>Subtrenada</th>
+      <th>Línea</th>
+      <th>Tasa Real (car/h)</th>
+      <th>Tasa Diseño</th>
+      <th>Diferencia (%)</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="footer">
+  📤 Generado automáticamente — Departamento de Operaciones FEPASA
+</div>
+
+<script>
+// ---------------- DATOS SIMULADOS ----------------
+const datos = [
+  { tren: "50602", linea: "2", subtrenada: "HO1", tasa: 5.20, tasa_diseno: 5.45, cierre: "2025-10-25T10:00" },
+  { tren: "50602", linea: "2", subtrenada: "HO2", tasa: 5.60, tasa_diseno: 5.45, cierre: "2025-10-25T12:00" },
+  { tren: "50602", linea: "3", subtrenada: "HO3", tasa: 6.95, tasa_diseno: 7.11, cierre: "2025-10-26T09:00" },
+  { tren: "50603", linea: "3", subtrenada: "HO4", tasa: 6.20, tasa_diseno: 7.11, cierre: "2025-10-26T18:00" },
+];
+
+// Inicializar selects
+const trenSelect = document.getElementById("tren");
+const subtrenadaSelect = document.getElementById("subtrenada");
+const cierreSelect = document.getElementById("cierre");
+const trenes = [...new Set(datos.map(d => d.tren))];
+trenes.forEach(t => trenSelect.innerHTML += `<option value="${t}">${t}</option>`);
+datos.forEach(d => {
+  subtrenadaSelect.innerHTML += `<option value="${d.subtrenada}">${d.subtrenada}</option>`;
+  cierreSelect.innerHTML += `<option value="${d.cierre}">${d.cierre}</option>`;
+});
+
+// ---------------- FUNCIONES PRINCIPALES ----------------
+function actualizarDashboard() {
+  const desde = document.getElementById("desde").value;
+  const hasta = document.getElementById("hasta").value;
+  const tren = document.getElementById("tren").value;
+  const linea = document.getElementById("linea").value;
+  const subtrenada = document.getElementById("subtrenada").value;
+  const cierre = document.getElementById("cierre").value;
+
+  let filtrados = datos;
+
+  if (tren) filtrados = filtrados.filter(d => d.tren === tren);
+  if (linea) filtrados = filtrados.filter(d => d.linea === linea);
+  if (subtrenada) filtrados = filtrados.filter(d => d.subtrenada === subtrenada);
+  if (cierre) filtrados = filtrados.filter(d => d.cierre === cierre);
+  if (desde) filtrados = filtrados.filter(d => new Date(d.cierre) >= new Date(desde));
+  if (hasta) filtrados = filtrados.filter(d => new Date(d.cierre) <= new Date(hasta));
+
+  dibujarGrafico(filtrados);
+  actualizarTabla(filtrados);
+}
+
+function dibujarGrafico(datosFiltrados) {
+  const svg = document.getElementById("grafico");
+  svg.innerHTML = ""; // limpiar
+  const baseY = 350;
+  const escala = valor => (valor / 8) * 250;
+  const margenX = 80;
+
+  // Ejes
+  svg.innerHTML += `<line x1="${margenX}" y1="${baseY}" x2="850" y2="${baseY}" stroke="#000"/>`;
+  svg.innerHTML += `<line x1="${margenX}" y1="100" x2="${margenX}" y2="${baseY}" stroke="#000"/>`;
+
+  datosFiltrados.forEach((d, i) => {
+    const x = margenX + 100 * i;
+    const color = d.linea === "2" ? "#1e88e5" : "#f6b000";
+    const altura = escala(d.tasa);
+    const y = baseY - altura;
+    svg.innerHTML += `
+      <rect x="${x}" y="${y}" width="60" height="${altura}" fill="${color}" rx="4"/>
+      <text x="${x + 30}" y="${y - 8}" font-size="12" text-anchor="middle">${d.tasa.toFixed(2)}</text>
+      <text x="${x + 30}" y="${baseY + 15}" font-size="12" text-anchor="middle">${d.subtrenada}</text>
+    `;
+  });
+}
+
+function actualizarTabla(datosFiltrados) {
+  const tbody = document.querySelector("#tabla tbody");
+  tbody.innerHTML = "";
+  datosFiltrados.forEach(d => {
+    const diff = ((d.tasa / d.tasa_diseno) * 100 - 100).toFixed(1);
+    tbody.innerHTML += `
+      <tr>
+        <td>${d.subtrenada}</td>
+        <td>${d.linea}</td>
+        <td>${d.tasa.toFixed(2)}</td>
+        <td>${d.tasa_diseno}</td>
+        <td>${diff}%</td>
+      </tr>
+    `;
+  });
+}
+
+// Mostrar todo al inicio
+actualizarDashboard();
+</script>
+
+</body>
+</html>
