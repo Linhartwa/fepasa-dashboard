@@ -1,68 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Tiempos de Proceso - FEPASA</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: #f8f9fa;
-      text-align: center;
-      margin: 0;
-    }
-    h2 {
-      background-color: #003366;
-      color: white;
-      padding: 10px;
-      margin: 0;
-    }
-    svg {
-      background: white;
-      margin-top: 25px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border-radius: 8px;
-    }
-    .axis-label {
-      font-size: 13px;
-      fill: #333;
-      font-weight: bold;
-    }
-    .grid {
-      stroke: #ddd;
-      stroke-width: 1;
-      stroke-dasharray: 3 3;
-    }
-    .label {
-      font-size: 11px;
-      fill: #000;
-      font-weight: bold;
-    }
-    table {
-      width: 70%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-    }
-    th {
-      background-color: #003366;
-      color: white;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>⏱ Tiempos de Proceso</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; background: #fafafa; }
+  svg { border: 1px solid #ccc; background: #fff; }
+  .grid { stroke: #ddd; stroke-width: 0.5; }
+  .label { font-size: 12px; fill: #333; }
+  .axis-label { font-size: 14px; font-weight: bold; fill: #003366; }
+</style>
 </head>
 <body>
-
 <h2>⏱ Tiempos de Proceso por Subtrenada</h2>
-<svg id="chart" width="800" height="400"></svg>
-
-<table id="tablaResumen">
-  <thead>
-    <tr><th>Subtrenada</th><th>Tiempo Aviso-Retiro (min)</th><th>Tiempo Retiro-Postura (min)</th></tr>
-  </thead>
-  <tbody></tbody>
+<svg id="chart" width="950" height="480"></svg>
+<table border="1" cellpadding="6" style="margin:auto; margin-top:15px; border-collapse:collapse;">
+<thead style="background:#ddd;">
+<tr><th>Subtrenada</th><th>Aviso–Retiro</th><th>Retiro–Postura</th></tr>
+</thead>
+<tbody id="tablaResumen"></tbody>
 </table>
 
 <script>
@@ -72,50 +28,48 @@ const avisoRetiro = (params.get("aviso_retiro")?.split(",") || []).map(Number);
 const retiroPostura = (params.get("retiro_postura")?.split(",") || []).map(Number);
 
 const svg = document.getElementById("chart");
-const width = 800, height = 350, margin = 60;
-const barWidth = 40;
-const gap = 70;
+const width = 950, height = 480;
+const marginLeft = 100, marginBottom = 90, marginTop = 60, marginRight = 60;
+const barWidth = 40, gap = 80;
 const maxY = Math.max(10, ...avisoRetiro, ...retiroPostura);
-const scaleY = (height - 100) / maxY;
+const scaleY = (height - marginBottom - marginTop) / maxY;
 
-// Cuadrícula y eje Y
 for (let i = 0; i <= maxY; i += 5) {
-  const y = height - margin - i * scaleY;
-  svg.innerHTML += `<line x1="${margin}" y1="${y}" x2="${width - 50}" y2="${y}" class="grid"/>`;
-  svg.innerHTML += `<text x="${margin - 35}" y="${y + 4}" font-size="11">${i}</text>`;
+  const y = height - marginBottom - i * scaleY;
+  svg.innerHTML += `<line x1="${marginLeft}" y1="${y}" x2="${width - marginRight}" y2="${y}" class="grid"/>`;
+  svg.innerHTML += `<text x="${marginLeft - 35}" y="${y + 4}" font-size="11" fill="#555" text-anchor="end">${i}</text>`;
 }
 
 // Barras
 subtrenadas.forEach((st, i) => {
-  const x = margin + i * (gap + barWidth);
-  const yAviso = height - margin - (avisoRetiro[i] || 0) * scaleY;
-  const yRetiro = height - margin - (retiroPostura[i] || 0) * scaleY;
+  const x = marginLeft + i * (gap + barWidth);
+  const yAviso = height - marginBottom - (avisoRetiro[i] || 0) * scaleY;
+  const yRetiro = height - marginBottom - (retiroPostura[i] || 0) * scaleY;
 
-  // barra azul: aviso-retiro
-  svg.innerHTML += `<rect x="${x}" y="${yAviso}" width="${barWidth}" height="${(avisoRetiro[i] || 0) * scaleY}" fill="#0051A0"></rect>`;
-  svg.innerHTML += `<text x="${x + barWidth/4}" y="${yAviso - 5}" class="label">${(avisoRetiro[i] || 0).toFixed(0)}</text>`;
+  // Azul: Aviso–Retiro
+  svg.innerHTML += `<rect x="${x}" y="${yAviso}" width="${barWidth}" height="${(avisoRetiro[i] || 0) * scaleY}" fill="#007BFF"></rect>`;
+  svg.innerHTML += `<text x="${x + barWidth/2}" y="${yAviso - 5}" text-anchor="middle" fill="#003366" font-size="12">${(avisoRetiro[i] || 0).toFixed(0)}</text>`;
 
-  // barra amarilla: retiro-postura
-  svg.innerHTML += `<rect x="${x + barWidth + 5}" y="${yRetiro}" width="${barWidth}" height="${(retiroPostura[i] || 0) * scaleY}" fill="#FFB600"></rect>`;
-  svg.innerHTML += `<text x="${x + barWidth + 10}" y="${yRetiro - 5}" class="label">${(retiroPostura[i] || 0).toFixed(0)}</text>`;
+  // Amarillo: Retiro–Postura
+  svg.innerHTML += `<rect x="${x + barWidth + 10}" y="${yRetiro}" width="${barWidth}" height="${(retiroPostura[i] || 0) * scaleY}" fill="#FFB600"></rect>`;
+  svg.innerHTML += `<text x="${x + barWidth + 10 + barWidth/2}" y="${yRetiro - 5}" text-anchor="middle" fill="#805800" font-size="12">${(retiroPostura[i] || 0).toFixed(0)}</text>`;
 
-  // etiquetas eje X
-  svg.innerHTML += `<text x="${x + barWidth/2 + 20}" y="${height - margin + 20}" class="axis-label">${st}</text>`;
+  svg.innerHTML += `<text x="${x + barWidth + 5}" y="${height - marginBottom + 30}" font-size="12" fill="#333" text-anchor="middle">${st}</text>`;
 });
 
 // Ejes
-svg.innerHTML += `<line x1="${margin}" y1="${height - margin}" x2="${width - 50}" y2="${height - margin}" stroke="#333"/>`;
-svg.innerHTML += `<line x1="${margin}" y1="${height - margin}" x2="${margin}" y2="40" stroke="#333"/>`;
-svg.innerHTML += `<text x="${width/2 - 60}" y="${height - 15}" class="axis-label">Subtrenada Planificada</text>`;
-svg.innerHTML += `<text x="25" y="60" class="axis-label" transform="rotate(-90,25,60)">Tiempo (min)</text>`;
+svg.innerHTML += `<line x1="${marginLeft}" y1="${height - marginBottom}" x2="${width - marginRight}" y2="${height - marginBottom}" stroke="#333" stroke-width="1.5"/>`;
+svg.innerHTML += `<line x1="${marginLeft}" y1="${height - marginBottom}" x2="${marginLeft}" y2="${marginTop}" stroke="#333" stroke-width="1.5"/>`;
+svg.innerHTML += `<text x="${width/2}" y="${height - 25}" class="axis-label" text-anchor="middle">Subtrenada Planificada</text>`;
+svg.innerHTML += `<text x="25" y="${height/2}" class="axis-label" transform="rotate(-90,25,${height/2})" text-anchor="middle">Tiempo (min)</text>`;
 
 // Tabla resumen
 const tbody = document.querySelector("#tablaResumen tbody");
+tbody.innerHTML = "";
 subtrenadas.forEach((st, i) => {
   tbody.innerHTML += `<tr><td>${st}</td><td>${(avisoRetiro[i] || 0).toFixed(0)}</td><td>${(retiroPostura[i] || 0).toFixed(0)}</td></tr>`;
 });
 </script>
-
 </body>
 </html>
 
