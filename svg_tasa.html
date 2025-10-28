@@ -1,134 +1,87 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Tasa de Carga FEPASA</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: #f8f9fa;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    h2 {
-      background-color: #003366;
-      color: white;
-      margin: 0;
-      padding: 10px;
-    }
-    svg {
-      background: white;
-      margin-top: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border-radius: 10px;
-    }
-    .axis-label {
-      font-size: 13px;
-      fill: #333;
-      font-weight: bold;
-    }
-    .grid {
-      stroke: #ddd;
-      stroke-width: 1;
-      stroke-dasharray: 3 3;
-    }
-    .label {
-      font-size: 11px;
-      fill: #000;
-      font-weight: bold;
-    }
-    table {
-      width: 60%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-    }
-    th {
-      background-color: #003366;
-      color: white;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>📊 Tasa de Carga por Subtrenada</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; background: #fafafa; }
+  svg { border: 1px solid #ccc; background: #fff; }
+  .grid { stroke: #ddd; stroke-width: 0.5; }
+  .label { font-size: 12px; fill: #333; }
+  .axis-label { font-size: 14px; font-weight: bold; fill: #003366; }
+  .linea-diseno { stroke-dasharray: 6,4; stroke-width: 2; }
+</style>
 </head>
 <body>
-
 <h2>📊 Tasa de Carga por Subtrenada</h2>
-
-<svg id="chart" width="800" height="400"></svg>
-
-<table id="tablaResumen">
-  <thead>
-    <tr><th>Subtrenada</th><th>Tasa L2</th><th>Tasa L3</th></tr>
-  </thead>
-  <tbody></tbody>
+<svg id="chart" width="950" height="480"></svg>
+<table border="1" cellpadding="6" style="margin:auto; margin-top:15px; border-collapse:collapse;">
+<thead style="background:#ddd;">
+<tr><th>Subtrenada</th><th>Tasa L2</th><th>Tasa L3</th></tr>
+</thead>
+<tbody id="tablaResumen"></tbody>
 </table>
 
 <script>
 const params = new URLSearchParams(window.location.search);
 const subtrenadas = params.get("subtrenada_planificada")?.split(",") || [];
-const tasasL2 = (params.get("tasaL2")?.split(",") || []).map(Number);
-const tasasL3 = (params.get("tasaL3")?.split(",") || []).map(Number);
-
-const refL2 = 5.45;
-const refL3 = 7.11;
+const tasaL2 = (params.get("tasaL2")?.split(",") || []).map(Number);
+const tasaL3 = (params.get("tasaL3")?.split(",") || []).map(Number);
 
 const svg = document.getElementById("chart");
-const width = 800, height = 350, margin = 60;
-const barWidth = 40;
-const gap = 70;
-const maxY = Math.max(10, ...tasasL2, ...tasasL3, refL2, refL3);
-const scaleY = (height - 100) / maxY;
+const width = 950, height = 480;
+const marginLeft = 100, marginBottom = 90, marginTop = 60, marginRight = 60;
+const barWidth = 40, gap = 80;
+const maxY = Math.max(10, ...tasaL2, ...tasaL3, 8);
+const scaleY = (height - marginBottom - marginTop) / maxY;
 
-// Ejes y cuadrícula
 for (let i = 0; i <= maxY; i += 1) {
-  const y = height - margin - i * scaleY;
-  svg.innerHTML += `<line x1="${margin}" y1="${y}" x2="${width - 50}" y2="${y}" class="grid" />`;
-  svg.innerHTML += `<text x="${margin - 30}" y="${y + 4}" font-size="11">${i.toFixed(0)}</text>`;
+  const y = height - marginBottom - i * scaleY;
+  svg.innerHTML += `<line x1="${marginLeft}" y1="${y}" x2="${width - marginRight}" y2="${y}" class="grid"/>`;
+  svg.innerHTML += `<text x="${marginLeft - 35}" y="${y + 4}" font-size="11" fill="#555" text-anchor="end">${i.toFixed(1)}</text>`;
 }
 
+// Barras
 subtrenadas.forEach((st, i) => {
-  const x = margin + i * (gap + barWidth);
-  const yL2 = height - margin - (tasasL2[i] || 0) * scaleY;
-  const yL3 = height - margin - (tasasL3[i] || 0) * scaleY;
+  const x = marginLeft + i * (gap + barWidth);
+  const yL2 = height - marginBottom - (tasaL2[i] || 0) * scaleY;
+  const yL3 = height - marginBottom - (tasaL3[i] || 0) * scaleY;
 
-  // Barras
-  svg.innerHTML += `<rect x="${x}" y="${yL2}" width="${barWidth}" height="${(tasasL2[i] || 0) * scaleY}" fill="#0051A0"></rect>`;
-  svg.innerHTML += `<rect x="${x + barWidth + 5}" y="${yL3}" width="${barWidth}" height="${(tasasL3[i] || 0) * scaleY}" fill="#FFB600"></rect>`;
+  // Barra azul L2
+  svg.innerHTML += `<rect x="${x}" y="${yL2}" width="${barWidth}" height="${(tasaL2[i] || 0) * scaleY}" fill="#007BFF"></rect>`;
+  svg.innerHTML += `<text x="${x + barWidth/2}" y="${yL2 - 5}" text-anchor="middle" fill="#003366" font-size="12">${(tasaL2[i] || 0).toFixed(2)}</text>`;
 
-  // Etiquetas
-  svg.innerHTML += `<text x="${x}" y="${yL2 - 5}" class="label">${(tasasL2[i] || 0).toFixed(2)}</text>`;
-  svg.innerHTML += `<text x="${x + barWidth + 5}" y="${yL3 - 5}" class="label">${(tasasL3[i] || 0).toFixed(2)}</text>`;
+  // Barra amarilla L3
+  svg.innerHTML += `<rect x="${x + barWidth + 10}" y="${yL3}" width="${barWidth}" height="${(tasaL3[i] || 0) * scaleY}" fill="#FFB600"></rect>`;
+  svg.innerHTML += `<text x="${x + barWidth + 10 + barWidth/2}" y="${yL3 - 5}" text-anchor="middle" fill="#805800" font-size="12">${(tasaL3[i] || 0).toFixed(2)}</text>`;
 
-  // Nombres eje X
-  svg.innerHTML += `<text x="${x + barWidth/2 + 20}" y="${height - margin + 20}" class="axis-label">${st}</text>`;
+  svg.innerHTML += `<text x="${x + barWidth + 5}" y="${height - marginBottom + 30}" font-size="12" fill="#333" text-anchor="middle">${st}</text>`;
 });
 
-// Líneas de referencia
-const refY2 = height - margin - refL2 * scaleY;
-const refY3 = height - margin - refL3 * scaleY;
-svg.innerHTML += `<line x1="${margin}" y1="${refY2}" x2="${width - 50}" y2="${refY2}" stroke="#0051A0" stroke-dasharray="5 5"/>`;
-svg.innerHTML += `<line x1="${margin}" y1="${refY3}" x2="${width - 50}" y2="${refY3}" stroke="#FFB600" stroke-dasharray="5 5"/>`;
-svg.innerHTML += `<text x="${width - 45}" y="${refY2 - 5}" fill="#0051A0" font-size="12">Diseño L2 (${refL2})</text>`;
-svg.innerHTML += `<text x="${width - 45}" y="${refY3 - 5}" fill="#FFB600" font-size="12">Diseño L3 (${refL3})</text>`;
+// Líneas de referencia de diseño
+const lineaL2 = 5.45 * scaleY;
+const lineaL3 = 7.11 * scaleY;
+svg.innerHTML += `<line x1="${marginLeft}" y1="${height - marginBottom - lineaL2}" x2="${width - marginRight}" y2="${height - marginBottom - lineaL2}" stroke="#004C99" class="linea-diseno"/>`;
+svg.innerHTML += `<text x="${width - marginRight + 5}" y="${height - marginBottom - lineaL2 + 4}" font-size="12" fill="#004C99">L2 Diseño 5.45</text>`;
+svg.innerHTML += `<line x1="${marginLeft}" y1="${height - marginBottom - lineaL3}" x2="${width - marginRight}" y2="${height - marginBottom - lineaL3}" stroke="#FFB600" class="linea-diseno"/>`;
+svg.innerHTML += `<text x="${width - marginRight + 5}" y="${height - marginBottom - lineaL3 + 4}" font-size="12" fill="#805800">L3 Diseño 7.11</text>`;
 
-// Ejes
-svg.innerHTML += `<line x1="${margin}" y1="${height - margin}" x2="${width - 50}" y2="${height - margin}" stroke="#333"/>`;
-svg.innerHTML += `<line x1="${margin}" y1="${height - margin}" x2="${margin}" y2="40" stroke="#333"/>`;
-svg.innerHTML += `<text x="${width/2 - 40}" y="${height - 15}" class="axis-label">Subtrenada Planificada</text>`;
-svg.innerHTML += `<text x="20" y="60" class="axis-label" transform="rotate(-90,20,60)">Tasa de Carga (h)</text>`;
+// Ejes y etiquetas
+svg.innerHTML += `<line x1="${marginLeft}" y1="${height - marginBottom}" x2="${width - marginRight}" y2="${height - marginBottom}" stroke="#333" stroke-width="1.5"/>`;
+svg.innerHTML += `<line x1="${marginLeft}" y1="${height - marginBottom}" x2="${marginLeft}" y2="${marginTop}" stroke="#333" stroke-width="1.5"/>`;
+svg.innerHTML += `<text x="${width/2}" y="${height - 25}" class="axis-label" text-anchor="middle">Subtrenada Planificada</text>`;
+svg.innerHTML += `<text x="25" y="${height/2}" class="axis-label" transform="rotate(-90,25,${height/2})" text-anchor="middle">Tasa de Carga (car/h)</text>`;
 
 // Tabla resumen
 const tbody = document.querySelector("#tablaResumen tbody");
+tbody.innerHTML = "";
 subtrenadas.forEach((st, i) => {
-  tbody.innerHTML += `<tr><td>${st}</td><td>${(tasasL2[i] || 0).toFixed(2)}</td><td>${(tasasL3[i] || 0).toFixed(2)}</td></tr>`;
+  tbody.innerHTML += `<tr><td>${st}</td><td>${(tasaL2[i] || 0).toFixed(2)}</td><td>${(tasaL3[i] || 0).toFixed(2)}</td></tr>`;
 });
 </script>
-
 </body>
 </html>
+
+
 
 
