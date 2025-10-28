@@ -2,90 +2,86 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Tasa de Carga — FEPASA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasa de Carga</title>
 <style>
   body {
+    background: #fff;
     margin: 0;
-    background: white;
+    padding: 0;
     font-family: Arial, sans-serif;
   }
-  text { fill: #222; font-size: 12px; }
-  .axis { stroke: #ccc; stroke-width: 1; }
-  .linea { stroke-width: 2; stroke-dasharray: 4; }
-  .azul { fill: #0077FF; }
-  .amarillo { fill: #FFD200; }
-  .valor { font-weight: bold; font-size: 11px; fill: #000; }
+  svg {
+    width: 100%;
+    height: 260px;
+  }
+  .label {
+    font-size: 14px;
+    fill: #333;
+    font-weight: bold;
+  }
+  .value {
+    font-size: 12px;
+    fill: #111;
+  }
+  .linea-diseno {
+    stroke-dasharray: 4;
+    stroke-width: 2;
+  }
 </style>
 </head>
 <body>
-<svg id="grafico" width="640" height="340" xmlns="http://www.w3.org/2000/svg">
-  <text x="20" y="30" font-size="16" font-weight="bold">Cargando datos...</text>
-</svg>
+
+<svg id="grafico" viewBox="0 0 400 220"></svg>
 
 <script>
+function getParam(name) {
+  const params = new URLSearchParams(window.location.search);
+  return parseFloat(params.get(name)) || 0;
+}
+
+const tasaL2 = getParam("tasaL2");
+const tasaL3 = getParam("tasaL3");
+
 const svg = document.getElementById("grafico");
-const p = new URLSearchParams(window.location.search);
+const max = Math.max(tasaL2, tasaL3, 8); // escala dinámica
 
-// 🔹 Parámetros desde AppSheet
-const desde = p.get("desde") || "-";
-const hasta = p.get("hasta") || "-";
-const tren = p.get("tren") || "-";
-const subtrenadas = (p.get("subtrenada") || "").split(",").filter(s => s.trim() !== "");
-const tasaL2 = parseFloat(p.get("tasaL2") || 0);
-const tasaL3 = parseFloat(p.get("tasaL3") || 0);
+// Escalador simple para altura
+const escala = valor => (valor / max) * 150;
+const baseY = 180;
 
-// 🔹 Líneas de diseño (fijas)
-const disenoL2 = 5.45;
-const disenoL3 = 7.11;
+// Líneas de diseño
+const lineas = [
+  { y: 5.45, color: "blue", label: "Diseño L2 (5.45)" },
+  { y: 7.11, color: "orange", label: "Diseño L3 (7.11)" }
+];
 
-// 🔹 Configuración gráfica
-const maxY = 10;
-const baseY = 260;
-const anchoBarra = 35;
-const separacion = 100;
-const escala = 20; // 1 unidad = 20px en el eje Y
+// Dibujar líneas de diseño
+lineas.forEach(l => {
+  const y = baseY - escala(l.y);
+  svg.innerHTML += `
+    <line x1="40" y1="${y}" x2="340" y2="${y}" stroke="${l.color}" class="linea-diseno"/>
+    <text x="345" y="${y + 4}" class="value" fill="${l.color}">${l.label}</text>
+  `;
+});
 
-// 🔹 Generar SVG dinámico
-svg.innerHTML = `
-  <text x="20" y="25" font-size="16" font-weight="bold">Tasa de Carga Promedio — Tren ${tren}</text>
-  <text x="20" y="45" font-size="12">Desde: ${desde} | Hasta: ${hasta}</text>
+// Barras de tasas reales
+const barras = [
+  { x: 100, color: "blue", valor: tasaL2, label: "Tasa L2" },
+  { x: 220, color: "orange", valor: tasaL3, label: "Tasa L3" }
+];
 
-  <!-- Eje Y -->
-  <line x1="40" y1="50" x2="40" y2="${baseY}" class="axis" />
-  <line x1="40" y1="${baseY}" x2="${(subtrenadas.length*separacion)+60}" y2="${baseY}" class="axis" />
+barras.forEach(b => {
+  const altura = escala(b.valor);
+  const y = baseY - altura;
 
-  <!-- Líneas de diseño -->
-  <line x1="40" y1="${baseY - disenoL2*escala}" x2="${(subtrenadas.length*separacion)+60}" y2="${baseY - disenoL2*escala}" class="linea" stroke="#0077FF"/>
-  <text x="${(subtrenadas.length*separacion)+70}" y="${baseY - disenoL2*escala + 4}" fill="#0077FF" font-size="10">L2 Diseño (5.45)</text>
-
-  <line x1="40" y1="${baseY - disenoL3*escala}" x2="${(subtrenadas.length*separacion)+60}" y2="${baseY - disenoL3*escala}" class="linea" stroke="#FFD200"/>
-  <text x="${(subtrenadas.length*separacion)+70}" y="${baseY - disenoL3*escala + 4}" fill="#FFD200" font-size="10">L3 Diseño (7.11)</text>
-
-  <!-- Barras dinámicas -->
-  ${subtrenadas.map((s, i) => `
-    <!-- L2 -->
-    <rect x="${60 + i*separacion}" y="${baseY - tasaL2*escala}" width="${anchoBarra}" height="${tasaL2*escala}" class="azul"/>
-    <text x="${60 + i*separacion + anchoBarra/2 - 8}" y="${baseY - tasaL2*escala - 5}" class="valor">${tasaL2.toFixed(2)}</text>
-
-    <!-- L3 -->
-    <rect x="${60 + i*separacion + anchoBarra + 5}" y="${baseY - tasaL3*escala}" width="${anchoBarra}" height="${tasaL3*escala}" class="amarillo"/>
-    <text x="${60 + i*separacion + anchoBarra + 5 + anchoBarra/2 - 8}" y="${baseY - tasaL3*escala - 5}" class="valor">${tasaL3.toFixed(2)}</text>
-
-    <!-- Etiquetas -->
-    <text x="${60 + i*separacion + 15}" y="${baseY + 18}" font-size="11">${s}</text>
-  `).join("")}
-
-  <!-- Leyenda -->
-  <rect x="60" y="300" width="10" height="10" fill="#0077FF"/>
-  <text x="75" y="309">Tasa L2</text>
-  <rect x="150" y="300" width="10" height="10" fill="#FFD200"/>
-  <text x="165" y="309">Tasa L3</text>
-  <line x1="240" y1="305" x2="250" y2="305" stroke="#0077FF" stroke-width="2" stroke-dasharray="4"/>
-  <text x="255" y="309">Diseño L2 (5.45)</text>
-  <line x1="360" y1="305" x2="370" y2="305" stroke="#FFD200" stroke-width="2" stroke-dasharray="4"/>
-  <text x="375" y="309">Diseño L3 (7.11)</text>
-`;
+  svg.innerHTML += `
+    <rect x="${b.x}" y="${y}" width="60" height="${altura}" fill="${b.color}" rx="4"/>
+    <text x="${b.x + 10}" y="${y - 8}" class="value">${b.valor.toFixed(2)}</text>
+    <text x="${b.x + 10}" y="${baseY + 20}" class="label">${b.label}</text>
+  `;
+});
 </script>
+
 </body>
 </html>
-
