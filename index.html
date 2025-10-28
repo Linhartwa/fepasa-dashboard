@@ -10,61 +10,95 @@
       background-color: #f4f6f8;
       margin: 0;
       color: #333;
+      overflow: hidden;
     }
     header {
       background-color: #003366;
       color: white;
-      padding: 15px 20px;
+      padding: 12px 25px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
     header h1 {
-      font-size: 20px;
+      font-size: 22px;
       margin: 0;
-      font-weight: normal;
+      font-weight: 500;
+      letter-spacing: 0.5px;
     }
     nav a {
       color: white;
       text-decoration: none;
-      margin-left: 20px;
+      margin-left: 25px;
       font-size: 15px;
       font-weight: bold;
+      position: relative;
     }
     nav a:hover {
       text-decoration: underline;
     }
+    nav a.active {
+      border-bottom: 3px solid #FFB600;
+      padding-bottom: 3px;
+    }
     iframe {
       border: none;
       width: 100%;
-      height: calc(100vh - 70px);
+      height: calc(100vh - 75px);
+      background-color: #ffffff;
     }
     footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
       text-align: center;
       font-size: 12px;
       color: #666;
-      padding: 10px;
       background-color: #e9ecef;
+      padding: 6px;
+      box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo img {
+      height: 35px;
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>📊 Dashboard Operacional - FEPASA</h1>
+  <div class="logo">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/f/f0/Fepasa_logo.png" alt="FEPASA Logo">
+    <h1>Dashboard Operacional FEPASA</h1>
+  </div>
   <nav>
-    <a href="svg_tasa.html" target="iframe">Tasa de Carga</a>
-    <a href="svg_tiempo.html" target="iframe">Tiempos de Proceso</a>
+    <a href="svg_tasa.html" target="panel" class="active">Tasa de Carga</a>
+    <a href="svg_tiempo.html" target="panel">Tiempos de Proceso</a>
     <a href="https://appsheet.com/start/04f7bf47-3b74-4b82-a433-e6ac3e6b4199" target="_blank">Abrir AppSheet</a>
   </nav>
 </header>
 
-<iframe name="iframe" src="svg_tasa.html"></iframe>
+<iframe name="panel" src="svg_tasa.html"></iframe>
 
 <footer>
-  © 2025 FEPASA - Departamento de Operaciones 🚂
+  © 2025 FEPASA — Gerencia de Operaciones 🚂 | Linhart Ketterer
 </footer>
+
+<script>
+  // Resalta el enlace activo del menú
+  const links = document.querySelectorAll("nav a");
+  links.forEach(link => {
+    link.addEventListener("click", () => {
+      links.forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+</script>
 
 </body>
 </html>
