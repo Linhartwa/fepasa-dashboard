@@ -5,16 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tasa de Carga por Subtrenada</title>
 <style>
-  body { background:#fff; font-family:Arial,sans-serif; margin:0; }
+  body { background:#fff; font-family:Arial,sans-serif; margin:0; text-align:center; }
   svg { width:100%; height:340px; }
   .label { font-size:11px; fill:#333; font-weight:bold; text-anchor:middle; }
   .valor { font-size:11px; fill:#111; font-weight:bold; text-anchor:middle; }
   .linea-diseno { stroke-dasharray:4; stroke-width:2; }
+  table {
+    width:90%;
+    border-collapse:collapse;
+    margin:20px auto;
+    font-size:13px;
+  }
+  th, td {
+    border:1px solid #ccc;
+    padding:6px 8px;
+  }
+  th { background:#f2f2f2; }
+  tr:nth-child(even) { background:#fafafa; }
 </style>
 </head>
 <body>
 
 <svg id="grafico" viewBox="0 0 620 340"></svg>
+<div id="tabla"></div>
 
 <script>
 // ---- Leer parámetros desde la URL ----
@@ -28,20 +41,20 @@ const cierres = (p.get("fecha_cierre") || "")
   .split(",")
   .filter(s => s.trim() !== "");
 
-// ---- Crear encabezado dinámico ----
+// ---- Parámetros de diseño ----
 const svg = document.getElementById("grafico");
 const baseY = 260;
 const escala = 20; // 1 unidad = 20px
 const ancho = 30;
 const separacion = 90;
 
-// Líneas de diseño
+// ---- Líneas de diseño ----
 const lineas = [
   { y: 5.45, color: "#0077FF", label: "Diseño L2 (5.45)" },
   { y: 7.11, color: "#FFD200", label: "Diseño L3 (7.11)" }
 ];
 
-// ---- Dibujar encabezado y eje ----
+// ---- Dibujar encabezado ----
 svg.innerHTML = `
   <text x="20" y="25" font-size="16" font-weight="bold">Tasa de Carga Promedio</text>
   <text x="20" y="45" font-size="12">Fechas de cierre: ${cierres.join(" | ")}</text>
@@ -57,7 +70,7 @@ lineas.forEach(l => {
   `;
 });
 
-// ---- Dibujar barras dinámicas ----
+// ---- Dibujar barras ----
 subtrenadas.forEach((s, i) => {
   const xL2 = 60 + i * separacion;
   const xL3 = xL2 + ancho + 5;
@@ -65,12 +78,12 @@ subtrenadas.forEach((s, i) => {
   const hL3 = tasaL3 * escala;
 
   svg.innerHTML += `
-    <!-- Barras L2 -->
+    <!-- Barras -->
     <rect x="${xL2}" y="${baseY - hL2}" width="${ancho}" height="${hL2}" fill="#0077FF" rx="3"/>
-    <text x="${xL2 + ancho/2}" y="${baseY - hL2 - 6}" class="valor">${tasaL2.toFixed(2)}</text>
-
-    <!-- Barras L3 -->
     <rect x="${xL3}" y="${baseY - hL3}" width="${ancho}" height="${hL3}" fill="#FFD200" rx="3"/>
+
+    <!-- Valores -->
+    <text x="${xL2 + ancho/2}" y="${baseY - hL2 - 6}" class="valor">${tasaL2.toFixed(2)}</text>
     <text x="${xL3 + ancho/2}" y="${baseY - hL3 - 6}" class="valor">${tasaL3.toFixed(2)}</text>
 
     <!-- Etiqueta subtrenada -->
@@ -89,6 +102,37 @@ svg.innerHTML += `
   <line x1="340" y1="316" x2="352" y2="316" stroke="#FFD200" stroke-width="2" stroke-dasharray="4"/>
   <text x="360" y="320" font-size="11" fill="#FFD200">L3 Diseño</text>
 `;
+
+// ---- Generar tabla resumen ----
+let tablaHTML = `
+  <h3>📋 Resumen de Subtrenadas</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Subtrenada Planificada</th>
+        <th>Fecha y Hora de Cierre</th>
+        <th>Tasa L2 (car/h)</th>
+        <th>Tasa L3 (car/h)</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
+
+for (let i = 0; i < subtrenadas.length; i++) {
+  const cierre = cierres[i] || "-";
+  tablaHTML += `
+    <tr>
+      <td>${subtrenadas[i]}</td>
+      <td>${cierre}</td>
+      <td>${tasaL2.toFixed(2)}</td>
+      <td>${tasaL3.toFixed(2)}</td>
+    </tr>
+  `;
+}
+
+tablaHTML += `</tbody></table>`;
+document.getElementById("tabla").innerHTML = tablaHTML;
 </script>
 </body>
 </html>
+
