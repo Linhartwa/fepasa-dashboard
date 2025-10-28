@@ -1,47 +1,61 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>SVG Tasa de Carga</title>
+  <meta charset="UTF-8">
+  <title>Tasa de Carga FEPASA</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #f8f9fa; }
+    svg { margin-top: 40px; }
+    .label { font-size: 12px; fill: #333; }
+    .axis { font-size: 14px; font-weight: bold; }
+    .linea { stroke-dasharray: 5 5; }
+  </style>
 </head>
-<body style="margin:0; background:#ffffff;">
+<body>
+
+<h2>📊 Tasa de carga por subtrenada</h2>
+<svg id="chart" width="600" height="400"></svg>
+
 <script>
-  // Obtener parámetros de la URL
-  const params = new URLSearchParams(window.location.search);
-  const andes = Number(params.get("andes")) || 0;
-  const pacifico = Number(params.get("pacifico")) || 0;
-  const l3 = Number(params.get("l3")) || 0;
-  const max = Number(params.get("max")) || 100;
+const params = new URLSearchParams(window.location.search);
+const subtrenadas = params.get("subtrenada_planificada")?.split(",") || [];
+const tasaL2 = parseFloat(params.get("tasaL2")) || 0;
+const tasaL3 = parseFloat(params.get("tasaL3")) || 0;
 
-  // SVG dinámico
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="420" height="240" viewBox="0 0 420 240">
-    <style>
-      .lbl { font-family: Arial; font-size: 13px; fill: #444; }
-      .val { font-family: Arial; font-size: 14px; font-weight: bold; fill: #111; }
-    </style>
+// valores de referencia
+const refL2 = 5.45;
+const refL3 = 7.11;
 
-    <rect width="100%" height="100%" fill="#ffffff"/>
-    <text x="20" y="25" class="lbl">TASA DE CARGA PROMEDIO (car/h)</text>
+const svg = document.getElementById("chart");
+const barWidth = 80;
+const gap = 40;
+const baseY = 320;
 
-    <!-- Línea Andes -->
-    <rect x="20" y="50" width="${(andes / max) * 350}" height="25" fill="#2ecc71"/>
-    <text x="20" y="45" class="lbl">Andes</text>
-    <text x="${(andes / max) * 350 + 30}" y="68" class="val">${andes}</text>
+// Dibujar barras dinámicas
+subtrenadas.forEach((st, i) => {
+  const x = 60 + i * (barWidth + gap);
+  const alturaL2 = tasaL2 * 20;
+  const alturaL3 = tasaL3 * 20;
 
-    <!-- Línea Pacífico -->
-    <rect x="20" y="100" width="${(pacifico / max) * 350}" height="25" fill="#3498db"/>
-    <text x="20" y="95" class="lbl">Pacífico</text>
-    <text x="${(pacifico / max) * 350 + 30}" y="118" class="val">${pacifico}</text>
+  // barra L2 (azul)
+  svg.innerHTML += `<rect x="${x}" y="${baseY - alturaL2}" width="${barWidth/2-5}" height="${alturaL2}" fill="#007BFF"></rect>
+                    <text x="${x}" y="${baseY - alturaL2 - 5}" class="label">${tasaL2.toFixed(2)}h</text>`;
 
-    <!-- Línea 3 -->
-    <rect x="20" y="150" width="${(l3 / max) * 350}" height="25" fill="#f39c12"/>
-    <text x="20" y="145" class="lbl">Línea 3</text>
-    <text x="${(l3 / max) * 350 + 30}" y="168" class="val">${l3}</text>
-  </svg>
-  `;
+  // barra L3 (amarilla)
+  svg.innerHTML += `<rect x="${x + barWidth/2}" y="${baseY - alturaL3}" width="${barWidth/2-5}" height="${alturaL3}" fill="#FFC107"></rect>
+                    <text x="${x + barWidth/2}" y="${baseY - alturaL3 - 5}" class="label">${tasaL3.toFixed(2)}h</text>`;
 
-  document.write(svg);
+  // nombre subtrenada
+  svg.innerHTML += `<text x="${x + 20}" y="${baseY + 20}" class="axis">${st}</text>`;
+});
+
+// líneas de referencia
+svg.innerHTML += `<line x1="40" y1="${baseY - refL2*20}" x2="550" y2="${baseY - refL2*20}" stroke="#007BFF" class="linea"/>
+                  <text x="560" y="${baseY - refL2*20}" class="label">Diseño L2 (${refL2})</text>`;
+svg.innerHTML += `<line x1="40" y1="${baseY - refL3*20}" x2="550" y2="${baseY - refL3*20}" stroke="#FFC107" class="linea"/>
+                  <text x="560" y="${baseY - refL3*20}" class="label">Diseño L3 (${refL3})</text>`;
 </script>
+
 </body>
 </html>
+
