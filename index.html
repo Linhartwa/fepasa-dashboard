@@ -63,7 +63,11 @@
     max-width: 980px;
   }
 
-  .card h2 { text-align: center; color: #004b8d; font-size: 1.3em; }
+  .card h2 {
+    text-align: center;
+    color: #004b8d;
+    font-size: 1.3em;
+  }
 
   iframe {
     border: none;
@@ -112,22 +116,11 @@
   </div>
   <div>
     <label>Subtrenada:</label><br>
-    <select multiple id="subtrenada" size="3">
-      <option value="50601-1">50601-1</option>
-      <option value="50601-2">50601-2</option>
-      <option value="50601-3">50601-3</option>
-      <option value="50602-1">50602-1</option>
-      <option value="50602-2">50602-2</option>
-      <option value="50603-1">50603-1</option>
-    </select>
+    <input type="text" id="subtrenada" placeholder="Ej: 50601-1,50601-2">
   </div>
   <div>
     <label>Fecha y Hora de Cierre:</label><br>
-    <select multiple id="cierre" size="3">
-      <option value="2025-10-27T12:00">27/10/2025 12:00</option>
-      <option value="2025-10-27T18:00">27/10/2025 18:00</option>
-      <option value="2025-10-28T06:00">28/10/2025 06:00</option>
-    </select>
+    <input type="datetime-local" id="cierre">
   </div>
   <div style="align-self: end;">
     <button onclick="actualizarDashboard()" style="padding:8px 15px; background:#004b8d; color:white; border:none; border-radius:6px;">Actualizar</button>
@@ -153,27 +146,68 @@
 </footer>
 
 <script>
-// --- DATOS DE EJEMPLO (simulan datos reales de AppSheet) ---
-const datos = {
-  "50601": { subtrenadas:["50601-1","50601-2","50601-3"], tasaL2:[5.2,5.5,5.6], tasaL3:[6.9,7.1,7.0], aviso:[35,42,28], retiro:[50,46,40]},
-  "50602": { subtrenadas:["50602-1","50602-2"], tasaL2:[5.4,5.7], tasaL3:[7.0,7.3], aviso:[33,39], retiro:[47,44]},
-  "50603": { subtrenadas:["50603-1"], tasaL2:[5.8], tasaL3:[7.2], aviso:[38], retiro:[52]}
-};
+const appId = "04f7bf47-3b74-4b82-a433-e6ac3e6b4199";
+const apiKey = "AFmtp-tvFPE-EY23b-ZDc1p-2gmzw-RewnK-VMNyc-I8pTk";
+const table = "REGISTROS REALES";
 
-// --- FUNCION PRINCIPAL ---
-function actualizarDashboard(){
-  const tren = document.getElementById("tren").value || "50601";
-  const info = datos[tren];
+// --- CONSULTA DATOS DESDE APPSHEET ---
+async function obtenerDatosDesdeAppSheet() {
+  const url = `https://api.appsheet.com/api/v2/apps/${appId}/tables/${encodeURIComponent(table)}/records`;
+  
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "ApplicationAccessKey": apiKey,
+      "Accept": "application/json"
+    }
+  });
 
-  const subtrenadas = info.subtrenadas.join(",");
-  const tasaL2 = info.tasaL2.join(",");
-  const tasaL3 = info.tasaL3.join(",");
-  const aviso = info.aviso.join(",");
-  const retiro = info.retiro.join(",");
+  if (!response.ok) {
+    console.error("❌ Error al obtener datos de AppSheet:", response.statusText);
+    alert("Error al conectar con AppSheet. Revisa App ID y API Key.");
+    return [];
+  }
 
-  const urlTasa = `svg_tasa.html?subtrenada_planificada=${subtrenadas}&tasaL2=${tasaL2}&tasaL3=${tasaL3}`;
-  const urlTiempo = `svg_tiempo.html?subtrenada_planificada=${subtrenadas}&aviso_retiro=${aviso}&retiro_postura=${retiro}`;
+  const data = await response.json();
+  console.log("✅ Datos recibidos desde AppSheet:", data);
+  return data;
+}
 
+// --- FILTRA Y ACTUALIZA EL DASHBOARD ---
+async function actualizarDashboard() {
+  const tren = document.getElementById("tren").value;
+  const desde = document.getElementById("desde").value;
+  const hasta = document.getElementById("hasta").value;
+  const cierre = document.getElementById("cierre").value;
+
+  const datos = await obtenerDatosDesdeAppSheet();
+
+  const filtrados = datos.filter(r => {
+    const fecha = new Date(r["Fecha"]);
+    const matchTren = !tren || r["Tren"] == tren;
+    const matchDesde = !desde || fecha >= new Date(desde);
+    const matchHasta = !hasta || fecha <= new Date(hasta);
+    const matchCierre = !cierre || (r["Fecha y hora de cierre"] && r["Fecha y hora de cierre"].startsWith(cierre.split("T")[0]));
+    return matchTren && matchDesde && matchHasta && matchCierre;
+  });
+
+  if (filtrados.length === 0) {
+    alert("No hay registros para los filtros seleccionados.");
+    return;
+  }
+
+  // Construcción de arrays
+  const subtrenadas = filtrados.map(r => r["Subtrenada Planificada"]);
+  const tasaL2 = filtrados.map(r => Number(r["Tasa de carga L2"]) || 0);
+  const tasaL3 = filtrados.map(r => Number(r["Tasa de carga L3"]) || 0);
+  const aviso = filtrados.map(r => Number(r["Tiempo (aviso-retiro)"]) || 0);
+  const retiro = filtrados.map(r => Number(r["Tiempo (retiro-postura)"]) || 0);
+
+  // URLs para los SVG
+  const urlTasa = `svg_tasa.html?subtrenada_planificada=${subtrenadas.join(",")}&tasaL2=${tasaL2.join(",")}&tasaL3=${tasaL3.join(",")}`;
+  const urlTiempo = `svg_tiempo.html?subtrenada_planificada=${subtrenadas.join(",")}&aviso_retiro=${aviso.join(",")}&retiro_postura=${retiro.join(",")}`;
+
+  // Render en los iframes
   document.getElementById("iframeTasa").src = urlTasa;
   document.getElementById("iframeTiempo").src = urlTiempo;
 }
@@ -184,4 +218,3 @@ actualizarDashboard();
 
 </body>
 </html>
-
