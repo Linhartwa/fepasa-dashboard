@@ -31,20 +31,20 @@
       background: white;
       border-radius: 10px;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px;
+      padding: 25px;
     }
 
     h2 {
       text-align: center;
       color: #0a3871;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
 
     canvas {
       display: block;
       margin: 0 auto 10px;
       width: 100% !important;
-      height: 280px !important;
+      height: 360px !important; /* más alto */
     }
 
     table {
@@ -71,6 +71,11 @@
 
     tr:hover {
       background-color: #f1f6ff;
+    }
+
+    tfoot {
+      background: #eaf1ff;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -103,6 +108,9 @@
     const retiro = (params.get("retiro")?.split(",").map(Number)) || [];
     const postura = (params.get("postura")?.split(",").map(Number)) || [];
 
+    // 🧮 Función promedio
+    const promedio = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+
     // 🟦 GRAFICO 1 — TASA DE CARGA
     const ctx1 = document.getElementById('graficoTasa').getContext('2d');
     new Chart(ctx1, {
@@ -132,7 +140,6 @@
       },
       options: {
         plugins: {
-          title: { display: false },
           legend: { position: 'bottom' },
           tooltip: {
             callbacks: {
@@ -185,7 +192,12 @@
         <td>${postura[i]?.toFixed(2) || "-"}</td>
       </tr>`;
     }
-    html += "</tbody></table>";
+    html += "</tbody><tfoot><tr><td><b>Promedio</b></td>";
+    html += `<td>${promedio(tasaL2).toFixed(2)}</td>`;
+    html += `<td>${promedio(tasaL3).toFixed(2)}</td>`;
+    html += `<td>${promedio(retiro).toFixed(2)}</td>`;
+    html += `<td>${promedio(postura).toFixed(2)}</td>`;
+    html += "</tr></tfoot></table>";
     document.getElementById("tablaResumen").innerHTML = html;
   </script>
 </body>
