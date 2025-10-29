@@ -99,7 +99,7 @@
           <th>Aviso</th>
           <th>Retiro</th>
           <th>Carros Cargados</th>
-          <th>Tiempo Carga (min)</th>
+          <th>Tiempo Carga (hh:mm)</th>
           <th>Av-Ret (min)</th>
           <th>Ret-Post (min)</th>
           <th>Tasa Carga</th>
@@ -113,7 +113,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // === Leer parámetros de URL y limpiar ===
     const params = new URLSearchParams(window.location.search);
 
     const parseNumList = (str) => {
@@ -159,6 +158,13 @@
       });
     };
 
+    // 🔹 Función para convertir minutos a formato hh:mm
+    const formatTimeHHMM = (minutes) => {
+      const h = Math.floor(minutes / 60);
+      const m = Math.floor(minutes % 60);
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+
     const tbody = document.querySelector("#tablaDatos tbody");
     let totalCarros = 0, promTasa = 0, promEficiencia = 0;
 
@@ -172,9 +178,9 @@
         formatDateTime(aviso[i]),
         formatDateTime(retiro[i]),
         cargados[i] || 0,
-        Math.round(tiempoCarga[i] || 0),     // 🔹 ahora entero
-        Math.round(avisoRetiro[i] || 0),      // 🔹 entero
-        Math.round(avisoPostura[i] || 0),     // 🔹 entero
+        formatTimeHHMM(tiempoCarga[i] || 0),  // ⏱ en formato hh:mm
+        Math.round(avisoRetiro[i] || 0),
+        Math.round(avisoPostura[i] || 0),
         (tasaCarga[i] || 0).toFixed(2),
         (eficiencia[i] || 0).toFixed(2)
       ];
@@ -267,7 +273,7 @@
       plugins: [mostrarValores]
     });
 
-    // === Gráfico 2: Tiempos (sin decimales) ===
+    // === Gráfico 2: Tiempos ===
     new Chart(document.getElementById("tiempoChart"), {
       type: "bar",
       data: {
@@ -320,5 +326,4 @@
   </script>
 </body>
 </html>
-
 
