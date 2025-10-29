@@ -11,7 +11,9 @@
       background: #f4f7fa;
       margin: 0;
       padding: 0;
+      color: #222;
     }
+
     header {
       background: #0a3871;
       color: white;
@@ -19,9 +21,11 @@
       padding: 15px;
       font-size: 1.3em;
       font-weight: bold;
+      letter-spacing: 0.5px;
     }
+
     section {
-      margin: 30px auto;
+      margin: 25px auto;
       width: 90%;
       max-width: 1000px;
       background: white;
@@ -29,23 +33,64 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
       padding: 20px;
     }
+
     h2 {
       text-align: center;
       color: #0a3871;
+      margin-bottom: 10px;
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto 10px;
+      width: 100% !important;
+      height: 280px !important;
+    }
+
+    table {
+      width: 95%;
+      border-collapse: collapse;
+      margin: 25px auto;
+      font-size: 0.9em;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    table thead {
+      background: #0a3871;
+      color: white;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:hover {
+      background-color: #f1f6ff;
     }
   </style>
 </head>
+
 <body>
   <header>📊 Dashboard Operacional – FEPASA</header>
 
   <section>
     <h2>Tasa de Carga por Subtrenada</h2>
-    <canvas id="graficoTasa" height="350"></canvas>
+    <canvas id="graficoTasa"></canvas>
   </section>
 
   <section>
     <h2>Tiempos de Proceso</h2>
-    <canvas id="graficoTiempo" height="350"></canvas>
+    <canvas id="graficoTiempo"></canvas>
+  </section>
+
+  <section>
+    <h2>Resumen de Subtrenadas</h2>
+    <div id="tablaResumen"></div>
   </section>
 
   <script>
@@ -65,16 +110,8 @@
       data: {
         labels: subtrenadas,
         datasets: [
-          {
-            label: 'Tasa L2',
-            data: tasaL2,
-            backgroundColor: '#007bff'
-          },
-          {
-            label: 'Tasa L3',
-            data: tasaL3,
-            backgroundColor: '#ffc107'
-          },
+          { label: 'Tasa L2', data: tasaL2, backgroundColor: '#007bff' },
+          { label: 'Tasa L3', data: tasaL3, backgroundColor: '#ffc107' },
           {
             label: 'Diseño L2 (5.45)',
             data: Array(subtrenadas.length).fill(5.45),
@@ -95,8 +132,13 @@
       },
       options: {
         plugins: {
-          title: { display: true, text: 'Tasa de Carga Promedio' },
-          legend: { position: 'bottom' }
+          title: { display: false },
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} car/h`
+            }
+          }
         },
         scales: {
           x: { title: { display: true, text: 'Subtrenada Planificada' } },
@@ -105,29 +147,25 @@
       }
     });
 
-    // 🟪 GRAFICO 2 — TIEMPOS
+    // 🟪 GRAFICO 2 — TIEMPOS DE PROCESO
     const ctx2 = document.getElementById('graficoTiempo').getContext('2d');
     new Chart(ctx2, {
       type: 'bar',
       data: {
         labels: subtrenadas,
         datasets: [
-          {
-            label: 'Aviso - Retiro (h)',
-            data: retiro,
-            backgroundColor: '#0dcaf0'
-          },
-          {
-            label: 'Retiro - Postura (h)',
-            data: postura,
-            backgroundColor: '#6610f2'
-          }
+          { label: 'Aviso - Retiro (h)', data: retiro, backgroundColor: '#0dcaf0' },
+          { label: 'Retiro - Postura (h)', data: postura, backgroundColor: '#6610f2' }
         ]
       },
       options: {
         plugins: {
-          title: { display: true, text: 'Tiempos de Proceso por Subtrenada' },
-          legend: { position: 'bottom' }
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} h`
+            }
+          }
         },
         scales: {
           x: { title: { display: true, text: 'Subtrenada Planificada' } },
@@ -135,7 +173,22 @@
         }
       }
     });
+
+    // 📋 TABLA RESUMEN
+    let html = "<table><thead><tr><th>Subtrenada</th><th>Tasa L2</th><th>Tasa L3</th><th>Aviso-Retiro (h)</th><th>Retiro-Postura (h)</th></tr></thead><tbody>";
+    for (let i = 0; i < subtrenadas.length; i++) {
+      html += `<tr>
+        <td>${subtrenadas[i] || "-"}</td>
+        <td>${tasaL2[i]?.toFixed(2) || "-"}</td>
+        <td>${tasaL3[i]?.toFixed(2) || "-"}</td>
+        <td>${retiro[i]?.toFixed(2) || "-"}</td>
+        <td>${postura[i]?.toFixed(2) || "-"}</td>
+      </tr>`;
+    }
+    html += "</tbody></table>";
+    document.getElementById("tablaResumen").innerHTML = html;
   </script>
 </body>
 </html>
+
 
