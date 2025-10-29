@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Operacional - FEPASA</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: "Segoe UI", sans-serif;
       background: #f4f7fa;
       margin: 0;
       padding: 0;
@@ -17,11 +18,32 @@
     header {
       background: #0a3871;
       color: white;
-      text-align: center;
-      padding: 15px;
-      font-size: 1.3em;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .header-content img {
+      height: 45px;
+    }
+
+    .header-content h1 {
+      font-size: 1.4em;
       font-weight: bold;
-      letter-spacing: 0.5px;
+      margin: 0;
+    }
+
+    .blue-line {
+      height: 5px;
+      background: #003366;
+      width: 100%;
     }
 
     .dashboard {
@@ -31,7 +53,7 @@
       gap: 20px;
       margin: 25px auto;
       width: 95%;
-      max-width: 1200px;
+      max-width: 1300px;
     }
 
     .chart-card {
@@ -39,8 +61,8 @@
       border-radius: 10px;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
       padding: 20px;
-      flex: 1 1 500px;
-      max-width: 560px;
+      flex: 1 1 560px;
+      max-width: 600px;
     }
 
     h2 {
@@ -52,6 +74,16 @@
     canvas {
       width: 100% !important;
       height: 300px !important;
+    }
+
+    section.table-section {
+      margin: 25px auto;
+      width: 95%;
+      max-width: 1200px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      padding: 25px;
     }
 
     table {
@@ -80,141 +112,203 @@
       background-color: #f1f6ff;
     }
 
-    tfoot {
+    .resumen-kpi {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 25px;
       background: #eaf1ff;
+      border: 1px solid #bcd0ff;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .kpi-box {
+      flex: 1;
+      color: #0a3871;
       font-weight: bold;
+    }
+
+    .kpi-box canvas {
+      width: 100px !important;
+      height: 100px !important;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 
 <body>
-  <header>📊 Dashboard Operacional – FEPASA</header>
+  <header>
+    <div class="header-content">
+      <img src="https://www.fepasa.com/wp-content/uploads/2023/03/LOGO-FEPASA-VECTORIAL-1.png" alt="Logo FEPASA">
+      <h1>Dashboard Operacional – FEPASA</h1>
+    </div>
+    <div class="blue-line"></div>
+  </header>
 
   <div class="dashboard">
-    <!-- Gráfico 1 -->
     <div class="chart-card">
       <h2>Tasa de Carga</h2>
       <canvas id="graficoTasa"></canvas>
-      <div id="tablaTasa"></div>
     </div>
 
-    <!-- Gráfico 2 -->
     <div class="chart-card">
       <h2>Tiempos de Proceso (min)</h2>
       <canvas id="graficoTiempo"></canvas>
-      <div id="tablaTiempo"></div>
     </div>
   </div>
 
+  <section class="table-section">
+    <h2>Análisis de Carga – Tren <span id="nombreTren"></span></h2>
+    <div id="tablaResumen"></div>
+
+    <div class="resumen-kpi">
+      <div class="kpi-box">
+        🚛<br/>Total Carros Cargados<br/>
+        <span id="totalCarros" style="font-size:1.4em"></span>
+      </div>
+      <div class="kpi-box">
+        ⚙️<br/>Promedio Tasa de Carga<br/>
+        <span id="promTasa" style="font-size:1.4em"></span>
+      </div>
+      <div class="kpi-box">
+        🎯<br/>Eficiencia Promedio<br/>
+        <canvas id="graficoKPI"></canvas>
+        <span id="promEficiencia" style="font-size:1.2em"></span>
+      </div>
+    </div>
+  </section>
+
   <script>
-    // Leer parámetros
     const params = new URLSearchParams(window.location.search);
-
+    const tren = params.get("tren") || "-";
     const subtrenadas = params.get("subtrenadas")?.split(",") || [];
-    const tasaL2 = (params.get("tasaL2")?.split(",").map(Number)) || [];
-    const tasaL3 = (params.get("tasaL3")?.split(",").map(Number)) || [];
-    const retiro = (params.get("retiro")?.split(",").map(Number)) || [];
-    const postura = (params.get("postura")?.split(",").map(Number)) || [];
+    const linea = params.get("linea")?.split(",") || [];
+    const postura = params.get("postura")?.split(",") || [];
+    const aviso = params.get("aviso")?.split(",") || [];
+    const retiro = params.get("retiro")?.split(",") || [];
+    const cargados = params.get("cargados")?.split(",").map(Number) || [];
+    const tiempoCarga = params.get("tiempoCarga")?.split(",").map(Number) || [];
+    const avisoRetiro = params.get("avisoRetiro")?.split(",").map(Number) || [];
+    const avisoPostura = params.get("avisoPostura")?.split(",").map(Number) || [];
+    const tasaCarga = params.get("tasaCarga")?.split(",").map(Number) || [];
+    const eficiencia = params.get("eficiencia")?.split(",").map(Number) || [];
 
-    // Promedio
-    const promedio = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+    document.getElementById("nombreTren").innerText = tren;
 
-    // 🎯 GRAFICO TASA
-    const ctx1 = document.getElementById('graficoTasa').getContext('2d');
+    const promedio = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+    const total = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) : 0;
+
+    // === GRAFICO TASA ===
+    const ctx1 = document.getElementById("graficoTasa").getContext("2d");
     new Chart(ctx1, {
-      type: 'bar',
+      type: "bar",
       data: {
         labels: subtrenadas,
         datasets: [
-          { label: 'Tasa L2', data: tasaL2, backgroundColor: '#007bff' },
-          { label: 'Tasa L3', data: tasaL3, backgroundColor: '#ffc107' },
-          {
-            label: 'Diseño L2 (5.45)',
-            data: Array(subtrenadas.length).fill(5.45),
-            type: 'line',
-            borderColor: '#007bff',
-            borderDash: [6, 4],
-            fill: false
+          { label: "Tasa de Carga (car/h)", data: tasaCarga, backgroundColor: "#007bff" },
+          { label: "Eficiencia (%)", data: eficiencia, backgroundColor: "#ffc107" },
+        ],
+      },
+      options: {
+        plugins: {
+          legend: { position: "bottom" },
+          datalabels: {
+            color: "black",
+            anchor: "end",
+            align: "top",
+            formatter: (v) => v.toFixed(1),
           },
-          {
-            label: 'Diseño L3 (7.11)',
-            data: Array(subtrenadas.length).fill(7.11),
-            type: 'line',
-            borderColor: '#ff8800',
-            borderDash: [6, 4],
-            fill: false
-          }
-        ]
-      },
-      options: {
-        plugins: {
-          legend: { position: 'bottom' },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} car/h`
-            }
-          }
         },
         scales: {
-          x: { title: { display: true, text: 'Subtrenada Planificada' } },
-          y: { title: { display: true, text: 'Tasa (car/h)' }, beginAtZero: true }
-        }
-      }
+          x: { title: { display: true, text: "Subtrenada Planificada" } },
+          y: { beginAtZero: true, title: { display: true, text: "Valor" } },
+        },
+      },
+      plugins: [ChartDataLabels],
     });
 
-    // 🎯 GRAFICO TIEMPO (en minutos)
-    const ctx2 = document.getElementById('graficoTiempo').getContext('2d');
+    // === GRAFICO TIEMPOS ===
+    const ctx2 = document.getElementById("graficoTiempo").getContext("2d");
     new Chart(ctx2, {
-      type: 'bar',
+      type: "bar",
       data: {
         labels: subtrenadas,
         datasets: [
-          { label: 'Aviso - Retiro (min)', data: retiro, backgroundColor: '#0dcaf0' },
-          { label: 'Retiro - Postura (min)', data: postura, backgroundColor: '#6610f2' }
-        ]
+          { label: "Aviso - Retiro (min)", data: avisoRetiro, backgroundColor: "#0dcaf0" },
+          { label: "Retiro - Postura (min)", data: avisoPostura, backgroundColor: "#6610f2" },
+        ],
       },
       options: {
         plugins: {
-          legend: { position: 'bottom' },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)} min`
-            }
-          }
+          legend: { position: "bottom" },
+          datalabels: {
+            color: "white",
+            anchor: "center",
+            align: "center",
+            font: { weight: "bold" },
+            formatter: (v) => v.toFixed(0),
+          },
         },
         scales: {
-          x: { title: { display: true, text: 'Subtrenada Planificada' } },
-          y: { title: { display: true, text: 'Duración (min)' }, beginAtZero: true }
-        }
-      }
+          x: { title: { display: true, text: "Subtrenada Planificada" } },
+          y: { beginAtZero: true, title: { display: true, text: "Minutos" } },
+        },
+      },
+      plugins: [ChartDataLabels],
     });
 
-    // 🧾 TABLA TASA
-    let htmlTasa = "<table><thead><tr><th>Subtrenada</th><th>Tasa L2</th><th>Tasa L3</th></tr></thead><tbody>";
+    // === TABLA PRINCIPAL ===
+    let html = `<table><thead><tr>
+      <th>Subtrenada</th><th>Línea</th><th>Postura</th><th>Aviso</th><th>Retiro</th>
+      <th>Carros Cargados</th><th>Tiempo Carga (min)</th>
+      <th>Aviso-Retiro (min)</th><th>Aviso-Postura (min)</th>
+      <th>Tasa Carga (car/h)</th><th>Eficiencia (%)</th>
+    </tr></thead><tbody>`;
     for (let i = 0; i < subtrenadas.length; i++) {
-      htmlTasa += `<tr>
+      html += `<tr>
         <td>${subtrenadas[i] || "-"}</td>
-        <td>${tasaL2[i]?.toFixed(2) || "-"}</td>
-        <td>${tasaL3[i]?.toFixed(2) || "-"}</td>
+        <td>${linea[i] || "-"}</td>
+        <td>${postura[i] || "-"}</td>
+        <td>${aviso[i] || "-"}</td>
+        <td>${retiro[i] || "-"}</td>
+        <td>${cargados[i] || "-"}</td>
+        <td>${tiempoCarga[i]?.toFixed(0) || "-"}</td>
+        <td>${avisoRetiro[i]?.toFixed(0) || "-"}</td>
+        <td>${avisoPostura[i]?.toFixed(0) || "-"}</td>
+        <td>${tasaCarga[i]?.toFixed(2) || "-"}</td>
+        <td>${eficiencia[i]?.toFixed(1) || "-"}</td>
       </tr>`;
     }
-    htmlTasa += `</tbody><tfoot><tr><td><b>Promedio</b></td><td>${promedio(tasaL2).toFixed(2)}</td><td>${promedio(tasaL3).toFixed(2)}</td></tr></tfoot></table>`;
-    document.getElementById("tablaTasa").innerHTML = htmlTasa;
+    html += `</tbody></table>`;
+    document.getElementById("tablaResumen").innerHTML = html;
 
-    // 🧾 TABLA TIEMPOS
-    let htmlTiempo = "<table><thead><tr><th>Subtrenada</th><th>Aviso - Retiro (min)</th><th>Retiro - Postura (min)</th></tr></thead><tbody>";
-    for (let i = 0; i < subtrenadas.length; i++) {
-      htmlTiempo += `<tr>
-        <td>${subtrenadas[i] || "-"}</td>
-        <td>${retiro[i]?.toFixed(0) || "-"}</td>
-        <td>${postura[i]?.toFixed(0) || "-"}</td>
-      </tr>`;
-    }
-    htmlTiempo += `</tbody><tfoot><tr><td><b>Promedio</b></td><td>${promedio(retiro).toFixed(0)}</td><td>${promedio(postura).toFixed(0)}</td></tr></tfoot></table>`;
-    document.getElementById("tablaTiempo").innerHTML = htmlTiempo;
-  </script>
-</body>
-</html>
+    // === KPI CIRCULAR ===
+    const totalCarros = total(cargados);
+    const promTasa = promedio(tasaCarga);
+    const promEficiencia = promedio(eficiencia);
 
+    document.getElementById("totalCarros").innerText = totalCarros;
+    document.getElementById("promTasa").innerText = promTasa.toFixed(2) + " car/h";
+    document.getElementById("promEficiencia").innerText = promEficiencia.toFixed(1) + "%";
 
+    // Color dinámico del KPI
+    let colorKPI = "#198754"; // verde
+    if (promEficiencia < 70) colorKPI = "#dc3545"; // rojo
+    else if (promEficiencia < 90) colorKPI = "#ffc107"; // amarillo
 
+    const ctxKPI = document.getElementById("graficoKPI").getContext("2d");
+    new Chart(ctxKPI, {
+      type: "doughnut",
+      data: {
+        datasets: [{
+          data: [promEficiencia, 100 - promEficiencia],
+          backgroundColor: [colorKPI, "#e0e0e0"],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        cutout: "75%",
+        plugins: { tooltip: { enabled: false } },
+   
