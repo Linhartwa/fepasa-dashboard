@@ -18,7 +18,6 @@
     header {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
       background-color: #003366;
       color: white;
       padding: 10px 30px;
@@ -52,7 +51,7 @@
 
     .chart {
       flex: 1;
-      min-width: 500px;
+      min-width: 480px;
       height: 400px;
     }
 
@@ -106,8 +105,19 @@
       text-align: center;
     }
 
+    @media (max-width: 768px) {
+      .charts {
+        flex-direction: column;
+        align-items: center;
+      }
+      .chart {
+        width: 100%;
+        height: 300px;
+      }
+    }
   </style>
 </head>
+
 <body>
 
   <header>
@@ -168,47 +178,58 @@
 
     document.getElementById("nombreTren").innerText = "Análisis de carga - Tren " + tren;
 
+    const hayL2 = linea.includes("L2");
+    const hayL3 = linea.includes("L3");
+
     // === GRAFICO TASA DE CARGA ===
     const ctx1 = document.getElementById("graficoTasa").getContext("2d");
+
+    const datasetsTasa = [
+      {
+        label: "Tasa L2 (car/h)",
+        data: linea.map((l, i) => (l === "L2" ? tasaCarga[i] : NaN)),
+        backgroundColor: "#007bff",
+        borderColor: "#0056b3",
+        borderWidth: 1,
+      },
+      {
+        label: "Tasa L3 (car/h)",
+        data: linea.map((l, i) => (l === "L3" ? tasaCarga[i] : NaN)),
+        backgroundColor: "#ffc107",
+        borderColor: "#cc9a06",
+        borderWidth: 1,
+      },
+    ];
+
+    if (hayL2) {
+      datasetsTasa.push({
+        label: "Diseño L2 (5.45)",
+        data: new Array(subtrenadas.length).fill(5.45),
+        type: "line",
+        borderColor: "#007bff",
+        borderDash: [6, 6],
+        borderWidth: 2,
+        pointRadius: 0,
+      });
+    }
+
+    if (hayL3) {
+      datasetsTasa.push({
+        label: "Diseño L3 (7.11)",
+        data: new Array(subtrenadas.length).fill(7.11),
+        type: "line",
+        borderColor: "#ff9800",
+        borderDash: [6, 6],
+        borderWidth: 2,
+        pointRadius: 0,
+      });
+    }
 
     new Chart(ctx1, {
       type: "bar",
       data: {
         labels: subtrenadas,
-        datasets: [
-          {
-            label: "Tasa L2 (car/h)",
-            data: linea.map((l, i) => (l === "L2" ? tasaCarga[i] : null)),
-            backgroundColor: "#007bff",
-            borderColor: "#0056b3",
-            borderWidth: 1,
-          },
-          {
-            label: "Tasa L3 (car/h)",
-            data: linea.map((l, i) => (l === "L3" ? tasaCarga[i] : null)),
-            backgroundColor: "#ffc107",
-            borderColor: "#cc9a06",
-            borderWidth: 1,
-          },
-          {
-            label: "Diseño L2 (5.45)",
-            data: new Array(subtrenadas.length).fill(5.45),
-            type: "line",
-            borderColor: "#007bff",
-            borderDash: [6, 6],
-            borderWidth: 2,
-            pointRadius: 0,
-          },
-          {
-            label: "Diseño L3 (7.11)",
-            data: new Array(subtrenadas.length).fill(7.11),
-            type: "line",
-            borderColor: "#ff9800",
-            borderDash: [6, 6],
-            borderWidth: 2,
-            pointRadius: 0,
-          },
-        ],
+        datasets: datasetsTasa,
       },
       options: {
         responsive: true,
@@ -219,34 +240,22 @@
             text: "Tasa de Carga por Subtrenada",
             font: { size: 18, weight: "bold" },
           },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                return context.dataset.label + ": " + context.formattedValue;
-              },
-            },
-          },
           datalabels: {
-            color: "#ffffff",
+            color: "#000",
             anchor: "end",
             align: "start",
-            font: { weight: "bold", size: 12 },
-            formatter: (value) => (value ? value.toFixed(1) : ""),
+            font: { weight: "bold", size: 11 },
+            formatter: (value) => (isNaN(value) ? "" : value.toFixed(2)),
           },
         },
         scales: {
           y: {
-            title: {
-              display: true,
-              text: "Tasa (car/h)",
-            },
+            title: { display: true, text: "Tasa (car/h)" },
             beginAtZero: true,
+            suggestedMax: 10,
           },
           x: {
-            title: {
-              display: true,
-              text: "Subtrenada Planificada",
-            },
+            title: { display: true, text: "Subtrenada Planificada" },
           },
         },
       },
@@ -286,7 +295,7 @@
             anchor: "end",
             align: "start",
             font: { weight: "bold", size: 12 },
-            formatter: (value) => (value ? value.toFixed(0) : ""),
+            formatter: (value) => (isNaN(value) ? "" : value.toFixed(0)),
           },
         },
         scales: {
@@ -315,10 +324,10 @@
         <td>${aviso[i] || ""}</td>
         <td>${retiro[i] || ""}</td>
         <td>${cargados[i] || ""}</td>
-        <td>${tiempoCarga[i] || ""}</td>
-        <td>${avisoRetiro[i] || ""}</td>
-        <td>${avisoPostura[i] || ""}</td>
-        <td>${tasaCarga[i] || ""}</td>
+        <td>${tiempoCarga[i] ? tiempoCarga[i].toFixed(2) : ""}</td>
+        <td>${avisoRetiro[i] ? avisoRetiro[i].toFixed(2) : ""}</td>
+        <td>${avisoPostura[i] ? avisoPostura[i].toFixed(2) : ""}</td>
+        <td>${tasaCarga[i] ? tasaCarga[i].toFixed(2) : ""}</td>
         <td>${eficiencia[i] ? eficiencia[i].toFixed(2) : ""}</td>
       `;
       tablaBody.appendChild(fila);
