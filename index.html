@@ -113,25 +113,43 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // === Obtener parámetros desde el enlace ===
+    // === Leer parámetros de URL y limpiar ===
     const params = new URLSearchParams(window.location.search);
 
+    // Función para limpiar listas numéricas (corrige espacios, %20, etc)
+    const parseNumList = (str) => {
+      return (str || "")
+        .replace(/%20/g, " ")
+        .split(",")
+        .map(s => Number(s.trim()))
+        .filter(n => !isNaN(n));
+    };
+
+    // Función para limpiar listas de texto
+    const parseTextList = (str) => {
+      return (str || "")
+        .replace(/%20/g, " ")
+        .split(",")
+        .map(s => s.trim());
+    };
+
+    // === Variables obtenidas del enlace ===
     const tren = params.get("tren") || "";
-    const subtrenadas = (params.get("subtrenadas") || "").split(",");
-    const lineas = (params.get("linea") || "").split(",");
-    const postura = (params.get("postura") || "").split(",");
-    const aviso = (params.get("aviso") || "").split(",");
-    const retiro = (params.get("retiro") || "").split(",");
-    const cargados = (params.get("cargados") || "").split(",").map(Number);
-    const tiempoCarga = (params.get("tiempoCarga") || "").split(",").map(Number);
-    const avisoRetiro = (params.get("avisoRetiro") || "").split(",").map(Number);
-    const avisoPostura = (params.get("avisoPostura") || "").split(",").map(Number);
-    const tasaCarga = (params.get("tasaCarga") || "").split(",").map(Number);
-    const eficiencia = (params.get("eficiencia") || "").split(",").map(Number);
+    const subtrenadas = parseTextList(params.get("subtrenadas"));
+    const lineas = parseTextList(params.get("linea"));
+    const postura = parseTextList(params.get("postura"));
+    const aviso = parseTextList(params.get("aviso"));
+    const retiro = parseTextList(params.get("retiro"));
+    const cargados = parseNumList(params.get("cargados"));
+    const tiempoCarga = parseNumList(params.get("tiempoCarga"));
+    const avisoRetiro = parseNumList(params.get("avisoRetiro"));
+    const avisoPostura = parseNumList(params.get("avisoPostura"));
+    const tasaCarga = parseNumList(params.get("tasaCarga"));
+    const eficiencia = parseNumList(params.get("eficiencia"));
 
     document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren}`;
 
-    // === Formato de fecha/hora ===
+    // === Formatear fecha/hora ===
     const formatDateTime = (dt) => {
       if (!dt || dt === "null" || dt === "") return "-";
       const parsed = new Date(dt);
@@ -145,7 +163,7 @@
       });
     };
 
-    // === Construcción de tabla ===
+    // === Construir tabla de datos ===
     const tbody = document.querySelector("#tablaDatos tbody");
     let totalCarros = 0, promTasa = 0, promEficiencia = 0;
 
@@ -247,9 +265,7 @@
         ]
       },
       options: {
-        plugins: {
-          legend: { position: "bottom" }
-        },
+        plugins: { legend: { position: "bottom" } },
         scales: {
           y: { beginAtZero: true, title: { display: true, text: "Tasa de Carga (car/h)" } },
           x: { title: { display: true, text: "Subtrenadas" } }
@@ -277,9 +293,7 @@
         ]
       },
       options: {
-        plugins: {
-          legend: { position: "bottom" }
-        },
+        plugins: { legend: { position: "bottom" } },
         scales: {
           y: { beginAtZero: true, title: { display: true, text: "Tiempo (minutos)" } },
           x: { title: { display: true, text: "Subtrenadas" } }
