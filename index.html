@@ -1,221 +1,141 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚂 Dashboard Operacional FEPASA</title>
-<style>
-  body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: #f4f6f8;
-    color: #222;
-    margin: 0;
-    padding: 0;
-  }
-
-  header {
-    background: #004b8d;
-    color: white;
-    text-align: center;
-    padding: 18px 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-
-  header h1 { font-size: 1.6em; margin: 0; }
-  header p { margin: 4px 0 0; font-size: 0.9em; opacity: 0.9; }
-
-  .filters {
-    background: white;
-    padding: 15px;
-    border-bottom: 2px solid #004b8d;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-  }
-
-  .filters label {
-    font-weight: bold;
-    color: #004b8d;
-  }
-
-  .filters input, .filters select {
-    padding: 5px 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 0.9em;
-  }
-
-  .container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 25px;
-    padding: 20px;
-  }
-
-  .card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-    padding: 20px;
-    width: 90%;
-    max-width: 980px;
-  }
-
-  .card h2 {
-    text-align: center;
-    color: #004b8d;
-    font-size: 1.3em;
-  }
-
-  iframe {
-    border: none;
-    width: 100%;
-    height: 540px;
-    border-radius: 10px;
-  }
-
-  footer {
-    text-align: center;
-    color: #555;
-    padding: 15px;
-    font-size: 0.8em;
-  }
-
-  @media (max-width: 768px) {
-    iframe { height: 420px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Operacional - FEPASA</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0a3871;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 1.3em;
+      font-weight: bold;
+    }
+    section {
+      margin: 30px auto;
+      width: 90%;
+      max-width: 1000px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #0a3871;
+    }
+  </style>
 </head>
 <body>
+  <header>📊 Dashboard Operacional – FEPASA</header>
 
-<header>
-  <h1>📊 Dashboard Operacional – FEPASA</h1>
-  <p>Supervisión de carga y tiempos de proceso por subtrenada</p>
-</header>
+  <section>
+    <h2>Tasa de Carga por Subtrenada</h2>
+    <canvas id="graficoTasa" height="350"></canvas>
+  </section>
 
-<!-- FILTROS -->
-<div class="filters">
-  <div>
-    <label>Desde:</label><br>
-    <input type="date" id="desde">
-  </div>
-  <div>
-    <label>Hasta:</label><br>
-    <input type="date" id="hasta">
-  </div>
-  <div>
-    <label>Tren:</label><br>
-    <select id="tren">
-      <option value="">Todos</option>
-      <option value="50601">50602</option>
-      <option value="50602">50604</option>
-      <option value="50603">50606</option>
-    </select>
-  </div>
-  <div>
-    <label>Subtrenada:</label><br>
-    <input type="text" id="subtrenada" placeholder="Ej: 50601-1,50601-2">
-  </div>
-  <div>
-    <label>Fecha y Hora de Cierre:</label><br>
-    <input type="datetime-local" id="cierre">
-  </div>
-  <div style="align-self: end;">
-    <button onclick="actualizarDashboard()" style="padding:8px 15px; background:#004b8d; color:white; border:none; border-radius:6px;">Actualizar</button>
-  </div>
-</div>
+  <section>
+    <h2>Tiempos de Proceso</h2>
+    <canvas id="graficoTiempo" height="350"></canvas>
+  </section>
 
-<!-- CONTENEDOR DE GRAFICOS -->
-<div class="container">
-  <div class="card">
-    <h2>🔹 Tasa de Carga por Subtrenada</h2>
-    <iframe id="iframeTasa"></iframe>
-  </div>
+  <script>
+    // 🧩 Leer parámetros de la URL
+    const params = new URLSearchParams(window.location.search);
 
-  <div class="card">
-    <h2>⏱ Tiempos de Proceso</h2>
-    <iframe id="iframeTiempo"></iframe>
-  </div>
-</div>
+    const subtrenadas = params.get("subtrenadas")?.split(",") || [];
+    const tasaL2 = (params.get("tasaL2")?.split(",").map(Number)) || [];
+    const tasaL3 = (params.get("tasaL3")?.split(",").map(Number)) || [];
+    const retiro = (params.get("retiro")?.split(",").map(Number)) || [];
+    const postura = (params.get("postura")?.split(",").map(Number)) || [];
 
-<footer>
-  📤 Generado automáticamente desde AppSheet – Operaciones FEPASA  
-  <br>© 2025 FEPASA | Supervisor de Operaciones: Linhart K.
-</footer>
+    // 🟦 GRAFICO 1 — TASA DE CARGA
+    const ctx1 = document.getElementById('graficoTasa').getContext('2d');
+    new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: subtrenadas,
+        datasets: [
+          {
+            label: 'Tasa L2',
+            data: tasaL2,
+            backgroundColor: '#007bff'
+          },
+          {
+            label: 'Tasa L3',
+            data: tasaL3,
+            backgroundColor: '#ffc107'
+          },
+          {
+            label: 'Diseño L2 (5.45)',
+            data: Array(subtrenadas.length).fill(5.45),
+            type: 'line',
+            borderColor: '#007bff',
+            borderDash: [6, 4],
+            fill: false
+          },
+          {
+            label: 'Diseño L3 (7.11)',
+            data: Array(subtrenadas.length).fill(7.11),
+            type: 'line',
+            borderColor: '#ff8800',
+            borderDash: [6, 4],
+            fill: false
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          title: { display: true, text: 'Tasa de Carga Promedio' },
+          legend: { position: 'bottom' }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Subtrenada Planificada' } },
+          y: { title: { display: true, text: 'Tasa (car/h)' }, beginAtZero: true }
+        }
+      }
+    });
 
-<script>
-const appId = "04f7bf47-3b74-4b82-a433-e6ac3e6b4199";
-const apiKey = "AFmtp-tvFPE-EY23b-ZDc1p-2gmzw-RewnK-VMNyc-I8pTk";
-const table = "REGISTROS REALES";
-
-// --- CONSULTA DATOS DESDE APPSHEET ---
-async function obtenerDatosDesdeAppSheet() {
-  const url = `https://fepasa-proxy.onrender.com/api/appsheet`;
-
-  
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "ApplicationAccessKey": apiKey,
-      "Accept": "application/json"
-    }
-  });
-
-  if (!response.ok) {
-    console.error("❌ Error al obtener datos de AppSheet:", response.statusText);
-    alert("Error al conectar con AppSheet. Revisa App ID y API Key.");
-    return [];
-  }
-
-  const data = await response.json();
-  console.log("✅ Datos recibidos desde AppSheet:", data);
-  return data;
-}
-
-// --- FILTRA Y ACTUALIZA EL DASHBOARD ---
-async function actualizarDashboard() {
-  const tren = document.getElementById("tren").value;
-  const desde = document.getElementById("desde").value;
-  const hasta = document.getElementById("hasta").value;
-  const cierre = document.getElementById("cierre").value;
-
-  const datos = await obtenerDatosDesdeAppSheet();
-
-  const filtrados = datos.filter(r => {
-    const fecha = new Date(r["Fecha"]);
-    const matchTren = !tren || r["Tren"] == tren;
-    const matchDesde = !desde || fecha >= new Date(desde);
-    const matchHasta = !hasta || fecha <= new Date(hasta);
-    const matchCierre = !cierre || (r["Fecha y hora de cierre"] && r["Fecha y hora de cierre"].startsWith(cierre.split("T")[0]));
-    return matchTren && matchDesde && matchHasta && matchCierre;
-  });
-
-  if (filtrados.length === 0) {
-    alert("No hay registros para los filtros seleccionados.");
-    return;
-  }
-
-  // Construcción de arrays
-  const subtrenadas = filtrados.map(r => r["Subtrenada Planificada"]);
-  const tasaL2 = filtrados.map(r => Number(r["Tasa de carga L2"]) || 0);
-  const tasaL3 = filtrados.map(r => Number(r["Tasa de carga L3"]) || 0);
-  const aviso = filtrados.map(r => Number(r["Tiempo (aviso-retiro)"]) || 0);
-  const retiro = filtrados.map(r => Number(r["Tiempo (retiro-postura)"]) || 0);
-
-  // URLs para los SVG
-  const urlTasa = `svg_tasa.html?subtrenada_planificada=${subtrenadas.join(",")}&tasaL2=${tasaL2.join(",")}&tasaL3=${tasaL3.join(",")}`;
-  const urlTiempo = `svg_tiempo.html?subtrenada_planificada=${subtrenadas.join(",")}&aviso_retiro=${aviso.join(",")}&retiro_postura=${retiro.join(",")}`;
-
-  // Render en los iframes
-  document.getElementById("iframeTasa").src = urlTasa;
-  document.getElementById("iframeTiempo").src = urlTiempo;
-}
-
-// Inicializar al cargar
-actualizarDashboard();
-</script>
-
+    // 🟪 GRAFICO 2 — TIEMPOS
+    const ctx2 = document.getElementById('graficoTiempo').getContext('2d');
+    new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: subtrenadas,
+        datasets: [
+          {
+            label: 'Aviso - Retiro (h)',
+            data: retiro,
+            backgroundColor: '#0dcaf0'
+          },
+          {
+            label: 'Retiro - Postura (h)',
+            data: postura,
+            backgroundColor: '#6610f2'
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          title: { display: true, text: 'Tiempos de Proceso por Subtrenada' },
+          legend: { position: 'bottom' }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Subtrenada Planificada' } },
+          y: { title: { display: true, text: 'Duración (h)' }, beginAtZero: true }
+        }
+      }
+    });
+  </script>
 </body>
 </html>
+
