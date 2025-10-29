@@ -41,27 +41,38 @@ app.get("/api/registros", async (req, res) => {
   }
 });
 
-// ✅ 2. Datos de FILTROS DASHBOARD
+// --- Endpoint 2: FILTROS DASHBOARD APPSHEET ---
 app.get("/api/filtros", async (req, res) => {
   try {
-    const r = await fetch(
+    const response = await fetch(
       `https://api.appsheet.com/api/v2/apps/${APP_ID}/tables/FILTROS%20DASHBOARD%20APPSHEET/records`,
       {
         method: "GET",
         headers: {
           "ApplicationAccessKey": API_KEY,
-          "Accept": "application/json"
-        }
+          "Accept": "application/json",
+        },
       }
     );
-    const data = await r.json();
+
+    const text = await response.text(); // 🔍 obtenemos texto sin asumir formato
+    if (!text) {
+      return res.status(500).json({ error: "Respuesta vacía desde AppSheet" });
+    }
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return res.status(500).json({
+        error: "Formato JSON inválido recibido desde AppSheet",
+        raw: text,
+      });
+    }
+
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
-
-// 🚀 Activar servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Proxy activo y con CORS habilitado en puerto ${PORT}`));
