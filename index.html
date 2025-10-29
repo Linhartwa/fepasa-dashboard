@@ -116,7 +116,6 @@
     // === Leer parámetros de URL y limpiar ===
     const params = new URLSearchParams(window.location.search);
 
-    // Función para limpiar listas numéricas (corrige espacios, %20, etc)
     const parseNumList = (str) => {
       return (str || "")
         .replace(/%20/g, " ")
@@ -125,7 +124,6 @@
         .filter(n => !isNaN(n));
     };
 
-    // Función para limpiar listas de texto
     const parseTextList = (str) => {
       return (str || "")
         .replace(/%20/g, " ")
@@ -133,7 +131,6 @@
         .map(s => s.trim());
     };
 
-    // === Variables obtenidas del enlace ===
     const tren = params.get("tren") || "";
     const subtrenadas = parseTextList(params.get("subtrenadas"));
     const lineas = parseTextList(params.get("linea"));
@@ -149,11 +146,10 @@
 
     document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren}`;
 
-    // === Formatear fecha/hora ===
     const formatDateTime = (dt) => {
       if (!dt || dt === "null" || dt === "") return "-";
       const parsed = new Date(dt);
-      if (isNaN(parsed.getTime())) return dt; 
+      if (isNaN(parsed.getTime())) return dt;
       return parsed.toLocaleString("es-CL", {
         day: "2-digit",
         month: "2-digit",
@@ -163,27 +159,25 @@
       });
     };
 
-    // === Construir tabla de datos ===
     const tbody = document.querySelector("#tablaDatos tbody");
     let totalCarros = 0, promTasa = 0, promEficiencia = 0;
 
     for (let i = 0; i < subtrenadas.length; i++) {
       const fila = document.createElement("tr");
 
-     const datos = [
-  subtrenadas[i] || "",
-  lineas[i] || "",
-  formatDateTime(postura[i]),
-  formatDateTime(aviso[i]),
-  formatDateTime(retiro[i]),
-  cargados[i] || 0,
-  (tiempoCarga[i] || 0).toFixed(2),          // sigue mostrando 2 decimales
-  Math.round(avisoRetiro[i] || 0),           // ⏱ entero sin decimales
-  Math.round(avisoPostura[i] || 0),          // ⏱ entero sin decimales
-  (tasaCarga[i] || 0).toFixed(2),
-  (eficiencia[i] || 0).toFixed(2)
-];
-
+      const datos = [
+        subtrenadas[i] || "",
+        lineas[i] || "",
+        formatDateTime(postura[i]),
+        formatDateTime(aviso[i]),
+        formatDateTime(retiro[i]),
+        cargados[i] || 0,
+        Math.round(tiempoCarga[i] || 0),     // 🔹 ahora entero
+        Math.round(avisoRetiro[i] || 0),      // 🔹 entero
+        Math.round(avisoPostura[i] || 0),     // 🔹 entero
+        (tasaCarga[i] || 0).toFixed(2),
+        (eficiencia[i] || 0).toFixed(2)
+      ];
 
       totalCarros += cargados[i] || 0;
       promTasa += tasaCarga[i] || 0;
@@ -197,7 +191,6 @@
       tbody.appendChild(fila);
     }
 
-    // === Fila resumen ===
     const tfoot = document.getElementById("resumen");
     if (subtrenadas.length > 0) {
       const filaResumen = document.createElement("tr");
@@ -211,7 +204,6 @@
       tfoot.appendChild(filaResumen);
     }
 
-    // === Plugin para mostrar valores sobre las barras ===
     const mostrarValores = {
       id: 'mostrarValores',
       afterDatasetsDraw(chart) {
@@ -224,7 +216,7 @@
               ctx.fillStyle = '#000';
               ctx.font = 'bold 12px Segoe UI';
               ctx.textAlign = 'center';
-              ctx.fillText(value.toFixed(2), bar.x, bar.y - 5);
+              ctx.fillText(value % 1 === 0 ? value : value.toFixed(2), bar.x, bar.y - 5);
             }
           });
         });
@@ -275,7 +267,7 @@
       plugins: [mostrarValores]
     });
 
-    // === Gráfico 2: Tiempos ===
+    // === Gráfico 2: Tiempos (sin decimales) ===
     new Chart(document.getElementById("tiempoChart"), {
       type: "bar",
       data: {
@@ -283,12 +275,12 @@
         datasets: [
           {
             label: "Aviso - Retiro (min)",
-            data: avisoRetiro,
+            data: avisoRetiro.map(v => Math.round(v || 0)),
             backgroundColor: "rgba(0, 150, 255, 0.7)"
           },
           {
             label: "Retiro - Postura (min)",
-            data: avisoPostura,
+            data: avisoPostura.map(v => Math.round(v || 0)),
             backgroundColor: "rgba(255, 150, 50, 0.8)"
           }
         ]
@@ -296,13 +288,37 @@
       options: {
         plugins: { legend: { position: "bottom" } },
         scales: {
-          y: { beginAtZero: true, title: { display: true, text: "Tiempo (minutos)" } },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: "Tiempo (minutos)" },
+            ticks: {
+              stepSize: 1,
+              callback: (value) => Math.round(value)
+            }
+          },
           x: { title: { display: true, text: "Subtrenadas" } }
         }
       },
-      plugins: [mostrarValores]
+      plugins: [{
+        id: 'mostrarValoresTiempos',
+        afterDatasetsDraw(chart) {
+          const { ctx } = chart;
+          chart.data.datasets.forEach((dataset, i) => {
+            chart.getDatasetMeta(i).data.forEach((bar, index) => {
+              const value = dataset.data[index];
+              if (value && value > 0) {
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 12px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText(Math.round(value), bar.x, bar.y - 5);
+              }
+            });
+          });
+        }
+      }]
     });
   </script>
 </body>
 </html>
+
 
