@@ -1,270 +1,265 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Operacional - FEPASA</title>
-  <link rel="icon" href="https://www.fepasa.com/wp-content/uploads/2023/03/LOGO-FEPASA-VECTORIAL-1.png" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Análisis de Carga - FEPASA</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f3f6fa;
+      font-family: 'Segoe UI', Arial, sans-serif;
       margin: 0;
       padding: 0;
+      background-color: #f7f9fb;
+      color: #222;
     }
-
     header {
       display: flex;
       align-items: center;
       background-color: #003366;
       color: white;
-      padding: 10px 30px;
+      padding: 12px 24px;
     }
-
     header img {
-      height: 55px;
+      height: 50px;
       margin-right: 15px;
     }
-
     h1 {
       font-size: 22px;
-      font-weight: bold;
+      margin: 0;
     }
-
     .container {
-      max-width: 1200px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 24px;
     }
-
     .charts {
       display: flex;
+      gap: 30px;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 20px;
     }
-
-    .chart {
-      flex: 1;
-      min-width: 480px;
-      height: 400px;
+    .chart-box {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      flex: 1 1 45%;
+      min-width: 400px;
     }
-
-    h2 {
-      text-align: center;
-      color: #003366;
-    }
-
-    table {
+    canvas {
       width: 100%;
+      height: 320px;
+    }
+    table {
       border-collapse: collapse;
-      margin-top: 20px;
+      width: 100%;
+      margin-top: 25px;
       background-color: white;
       border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
     }
-
-    thead {
+    th {
       background-color: #003366;
       color: white;
+      text-align: left;
+      padding: 8px;
     }
-
-    th, td {
-      padding: 10px;
+    td {
+      padding: 8px;
       text-align: center;
       border-bottom: 1px solid #ddd;
     }
-
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-
-    .tabla-resumen {
-      margin-top: 20px;
-      border: 2px solid #003366;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .tabla-resumen th {
-      background-color: #003366;
-      color: white;
-    }
-
-    .tabla-resumen td {
-      background-color: #e6f0ff;
+    tfoot td {
       font-weight: bold;
-    }
-
-    .text-center {
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      .charts {
-        flex-direction: column;
-        align-items: center;
-      }
-      .chart {
-        width: 100%;
-        height: 300px;
-      }
+      background-color: #e8f0ff;
     }
   </style>
 </head>
-
 <body>
-
   <header>
-    <img src="https://www.fepasa.com/wp-content/uploads/2023/03/LOGO-FEPASA-VECTORIAL-1.png" alt="FEPASA Logo" />
-    <h1>Dashboard Operacional – FEPASA</h1>
+    <img src="https://www.fepasa.com/wp-content/uploads/2023/03/LOGO-FEPASA-VECTORIAL-1.png" alt="FEPASA Logo">
+    <h1 id="titulo">📊 Análisis de Carga</h1>
   </header>
 
   <div class="container">
-    <h2 id="nombreTren">Dashboard Operacional</h2>
-
     <div class="charts">
-      <div class="chart">
-        <canvas id="graficoTasa"></canvas>
+      <div class="chart-box">
+        <canvas id="tasaCargaChart"></canvas>
       </div>
-      <div class="chart">
-        <canvas id="graficoTiempos"></canvas>
+      <div class="chart-box">
+        <canvas id="tiempoChart"></canvas>
       </div>
     </div>
 
-    <h2>Detalle de Subtrenadas</h2>
-    <table>
+    <table id="tablaDatos">
       <thead>
         <tr>
-          <th>SUBTRENADA</th>
-          <th>LINEA</th>
-          <th>POSTURA</th>
-          <th>AVISO</th>
-          <th>RETIRO</th>
-          <th>CARROS CARGADOS</th>
-          <th>TIEMPO DE CARGA (min)</th>
-          <th>AVISO - RETIRO (min)</th>
-          <th>RETIRO - POSTURA (min)</th>
-          <th>TASA DE CARGA</th>
-          <th>EFICIENCIA (%)</th>
+          <th>Subtrenada</th>
+          <th>Línea</th>
+          <th>Postura</th>
+          <th>Aviso</th>
+          <th>Retiro</th>
+          <th>Carros Cargados</th>
+          <th>Tiempo Carga (min)</th>
+          <th>Av-Ret (min)</th>
+          <th>Ret-Post (min)</th>
+          <th>Tasa Carga</th>
+          <th>Eficiencia (%)</th>
         </tr>
       </thead>
-      <tbody id="tabla-body"></tbody>
+      <tbody></tbody>
+      <tfoot id="resumen"></tfoot>
     </table>
-
-    <div id="resumen-tren"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // Obtener parámetros desde la URL
     const params = new URLSearchParams(window.location.search);
 
-    const tren = params.get("tren") || "-";
-    const subtrenadas = params.get("subtrenadas")?.split(",") || [];
-    const linea = params.get("linea")?.split(",") || [];
-    const postura = params.get("postura")?.split(",") || [];
-    const aviso = params.get("aviso")?.split(",") || [];
-    const retiro = params.get("retiro")?.split(",") || [];
-    const cargados = params.get("cargados")?.split(",").map(Number) || [];
-    const tiempoCarga = params.get("tiempoCarga")?.split(",").map(Number) || [];
-    const avisoRetiro = params.get("avisoRetiro")?.split(",").map(Number) || [];
-    const avisoPostura = params.get("avisoPostura")?.split(",").map(Number) || [];
-    const tasaCarga = params.get("tasaCarga")?.split(",").map(Number) || [];
-    const eficiencia = params.get("eficiencia")?.split(",").map(Number) || [];
+    const tren = params.get("tren") || "";
+    const subtrenadas = (params.get("subtrenadas") || "").split(",");
+    const lineas = (params.get("linea") || "").split(",");
+    const postura = (params.get("postura") || "").split(",");
+    const aviso = (params.get("aviso") || "").split(",");
+    const retiro = (params.get("retiro") || "").split(",");
+    const cargados = (params.get("cargados") || "").split(",").map(Number);
+    const tiempoCarga = (params.get("tiempoCarga") || "").split(",").map(Number);
+    const avisoRetiro = (params.get("avisoRetiro") || "").split(",").map(Number);
+    const avisoPostura = (params.get("avisoPostura") || "").split(",").map(Number);
+    const tasaCarga = (params.get("tasaCarga") || "").split(",").map(Number);
+    const eficiencia = (params.get("eficiencia") || "").split(",").map(Number);
 
-    document.getElementById("nombreTren").innerText = "Análisis de carga - Tren " + tren;
+    document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren}`;
 
-    const hayL2 = linea.includes("L2");
-    const hayL3 = linea.includes("L3");
-
-    // === GRAFICO TASA DE CARGA ===
-    const ctx1 = document.getElementById("graficoTasa").getContext("2d");
-
-    const datasetsTasa = [
-      {
-        label: "Tasa L2 (car/h)",
-        data: linea.map((l, i) => (l === "L2" ? tasaCarga[i] : NaN)),
-        backgroundColor: "#007bff",
-        borderColor: "#0056b3",
-        borderWidth: 1,
-      },
-      {
-        label: "Tasa L3 (car/h)",
-        data: linea.map((l, i) => (l === "L3" ? tasaCarga[i] : NaN)),
-        backgroundColor: "#ffc107",
-        borderColor: "#cc9a06",
-        borderWidth: 1,
-      },
-    ];
-
-    if (hayL2) {
-      datasetsTasa.push({
-        label: "Diseño L2 (5.45)",
-        data: new Array(subtrenadas.length).fill(5.45),
-        type: "line",
-        borderColor: "#007bff",
-        borderDash: [6, 6],
-        borderWidth: 2,
-        pointRadius: 0,
+    // Función para formatear fecha/hora correctamente
+    const formatDateTime = (dt) => {
+      if (!dt || dt === "null" || dt === "") return "-";
+      const parsed = new Date(dt);
+      if (isNaN(parsed.getTime())) return dt; // si ya viene formateado
+      return parsed.toLocaleString("es-CL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
       });
+    };
+
+    // Construcción de tabla
+    const tbody = document.querySelector("#tablaDatos tbody");
+    let totalCarros = 0, promTasa = 0, promEficiencia = 0;
+
+    for (let i = 0; i < subtrenadas.length; i++) {
+      const fila = document.createElement("tr");
+
+      const datos = [
+        subtrenadas[i] || "",
+        lineas[i] || "",
+        formatDateTime(postura[i]),
+        formatDateTime(aviso[i]),
+        formatDateTime(retiro[i]),
+        cargados[i] || 0,
+        (tiempoCarga[i] || 0).toFixed(2),
+        (avisoRetiro[i] || 0).toFixed(2),
+        (avisoPostura[i] || 0).toFixed(2),
+        (tasaCarga[i] || 0).toFixed(2),
+        (eficiencia[i] || 0).toFixed(2)
+      ];
+
+      totalCarros += cargados[i] || 0;
+      promTasa += tasaCarga[i] || 0;
+      promEficiencia += eficiencia[i] || 0;
+
+      datos.forEach(d => {
+        const td = document.createElement("td");
+        td.textContent = d;
+        fila.appendChild(td);
+      });
+      tbody.appendChild(fila);
     }
 
-    if (hayL3) {
-      datasetsTasa.push({
-        label: "Diseño L3 (7.11)",
-        data: new Array(subtrenadas.length).fill(7.11),
-        type: "line",
-        borderColor: "#ff9800",
-        borderDash: [6, 6],
-        borderWidth: 2,
-        pointRadius: 0,
-      });
+    // Fila resumen
+    const tfoot = document.getElementById("resumen");
+    if (subtrenadas.length > 0) {
+      const filaResumen = document.createElement("tr");
+      filaResumen.innerHTML = `
+        <td colspan="5"><strong>Resumen del Tren ${tren}</strong></td>
+        <td>${totalCarros.toFixed(0)}</td>
+        <td colspan="3"></td>
+        <td>${(promTasa / subtrenadas.length).toFixed(2)}</td>
+        <td>${(promEficiencia / subtrenadas.length).toFixed(2)}</td>
+      `;
+      tfoot.appendChild(filaResumen);
     }
 
-    new Chart(ctx1, {
+    // === PLUGIN PARA MOSTRAR VALORES SOBRE LAS BARRAS ===
+    const mostrarValores = {
+      id: 'mostrarValores',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        chart.data.datasets.forEach((dataset, i) => {
+          if (dataset.type === "line") return; // ignorar líneas
+          chart.getDatasetMeta(i).data.forEach((bar, index) => {
+            const value = dataset.data[index];
+            if (value && value > 0) {
+              ctx.fillStyle = '#000';
+              ctx.font = 'bold 12px Segoe UI';
+              ctx.textAlign = 'center';
+              ctx.fillText(value.toFixed(2), bar.x, bar.y - 5);
+            }
+          });
+        });
+      }
+    };
+
+    // === GRÁFICO 1: Tasa de carga ===
+    new Chart(document.getElementById("tasaCargaChart"), {
       type: "bar",
       data: {
         labels: subtrenadas,
-        datasets: datasetsTasa,
+        datasets: [
+          {
+            label: "Tasa Carga L2",
+            data: lineas.map((l, i) => l === "L2" ? tasaCarga[i] : 0),
+            backgroundColor: "rgba(0, 99, 255, 0.7)"
+          },
+          {
+            label: "Tasa Carga L3",
+            data: lineas.map((l, i) => l === "L3" ? tasaCarga[i] : 0),
+            backgroundColor: "rgba(255, 206, 86, 0.8)"
+          },
+          {
+            label: "Diseño L2 (5.45)",
+            data: subtrenadas.map(() => 5.45),
+            borderColor: "blue",
+            borderWidth: 2,
+            type: "line",
+            fill: false
+          },
+          {
+            label: "Diseño L3 (7.11)",
+            data: subtrenadas.map(() => 7.11),
+            borderColor: "orange",
+            borderWidth: 2,
+            type: "line",
+            fill: false
+          }
+        ]
       },
       options: {
-        responsive: true,
         plugins: {
-          legend: { position: "bottom" },
-          title: {
-            display: true,
-            text: "Tasa de Carga por Subtrenada",
-            font: { size: 18, weight: "bold" },
-          },
-          datalabels: {
-            color: "#000",
-            anchor: "end",
-            align: "start",
-            font: { weight: "bold", size: 11 },
-            formatter: (value) => (isNaN(value) ? "" : value.toFixed(2)),
-          },
+          legend: { position: "bottom" }
         },
         scales: {
-          y: {
-            title: { display: true, text: "Tasa (car/h)" },
-            beginAtZero: true,
-            suggestedMax: 10,
-          },
-          x: {
-            title: { display: true, text: "Subtrenada Planificada" },
-          },
-        },
+          y: { beginAtZero: true, title: { display: true, text: "Tasa de Carga (car/h)" } },
+          x: { title: { display: true, text: "Subtrenadas" } }
+        }
       },
-      plugins: [ChartDataLabels],
+      plugins: [mostrarValores]
     });
 
-    // === GRAFICO TIEMPOS ===
-    const ctx2 = document.getElementById("graficoTiempos").getContext("2d");
-    new Chart(ctx2, {
+    // === GRÁFICO 2: Tiempos ===
+    new Chart(document.getElementById("tiempoChart"), {
       type: "bar",
       data: {
         labels: subtrenadas,
@@ -272,92 +267,27 @@
           {
             label: "Aviso - Retiro (min)",
             data: avisoRetiro,
-            backgroundColor: "#7b42f6",
+            backgroundColor: "rgba(0, 150, 255, 0.7)"
           },
           {
             label: "Retiro - Postura (min)",
             data: avisoPostura,
-            backgroundColor: "#1abc9c",
-          },
-        ],
+            backgroundColor: "rgba(255, 150, 50, 0.8)"
+          }
+        ]
       },
       options: {
-        responsive: true,
         plugins: {
-          legend: { position: "bottom" },
-          title: {
-            display: true,
-            text: "Tiempos de Proceso",
-            font: { size: 18, weight: "bold" },
-          },
-          datalabels: {
-            color: "#fff",
-            anchor: "end",
-            align: "start",
-            font: { weight: "bold", size: 12 },
-            formatter: (value) => (isNaN(value) ? "" : value.toFixed(0)),
-          },
+          legend: { position: "bottom" }
         },
         scales: {
-          y: {
-            title: { display: true, text: "Tiempo (min)" },
-            beginAtZero: true,
-          },
-          x: {
-            title: { display: true, text: "Subtrenada Planificada" },
-          },
-        },
+          y: { beginAtZero: true, title: { display: true, text: "Tiempo (minutos)" } },
+          x: { title: { display: true, text: "Subtrenadas" } }
+        }
       },
-      plugins: [ChartDataLabels],
+      plugins: [mostrarValores]
     });
-
-    // === TABLA PRINCIPAL ===
-    const tablaBody = document.getElementById("tabla-body");
-    tablaBody.innerHTML = "";
-
-    subtrenadas.forEach((st, i) => {
-      const fila = document.createElement("tr");
-      fila.innerHTML = `
-        <td>${st || ""}</td>
-        <td>${linea[i] || ""}</td>
-        <td>${postura[i] || ""}</td>
-        <td>${aviso[i] || ""}</td>
-        <td>${retiro[i] || ""}</td>
-        <td>${cargados[i] || ""}</td>
-        <td>${tiempoCarga[i] ? tiempoCarga[i].toFixed(2) : ""}</td>
-        <td>${avisoRetiro[i] ? avisoRetiro[i].toFixed(2) : ""}</td>
-        <td>${avisoPostura[i] ? avisoPostura[i].toFixed(2) : ""}</td>
-        <td>${tasaCarga[i] ? tasaCarga[i].toFixed(2) : ""}</td>
-        <td>${eficiencia[i] ? eficiencia[i].toFixed(2) : ""}</td>
-      `;
-      tablaBody.appendChild(fila);
-    });
-
-    // === RESUMEN FINAL ===
-    const totalCarros = cargados.reduce((a, b) => a + (Number(b) || 0), 0);
-    const promedioTasa = tasaCarga.length ? (tasaCarga.reduce((a, b) => a + (Number(b) || 0), 0) / tasaCarga.length).toFixed(2) : 0;
-    const promedioEficiencia = eficiencia.length ? (eficiencia.reduce((a, b) => a + (Number(b) || 0), 0) / eficiencia.length).toFixed(2) : 0;
-
-    const resumenDiv = document.getElementById("resumen-tren");
-    resumenDiv.innerHTML = `
-      <h3 class="text-center">Resumen del Tren ${tren}</h3>
-      <table class="tabla-resumen">
-        <thead>
-          <tr>
-            <th>Total de Carros Cargados</th>
-            <th>Promedio Tasa de Carga (car/h)</th>
-            <th>Eficiencia Promedio (%)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>${totalCarros}</td>
-            <td>${promedioTasa}</td>
-            <td>${promedioEficiencia}</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
   </script>
 </body>
 </html>
+
