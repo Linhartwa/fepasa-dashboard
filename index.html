@@ -170,19 +170,20 @@
     for (let i = 0; i < subtrenadas.length; i++) {
       const fila = document.createElement("tr");
 
-      const datos = [
-        subtrenadas[i] || "",
-        lineas[i] || "",
-        formatDateTime(postura[i]),
-        formatDateTime(aviso[i]),
-        formatDateTime(retiro[i]),
-        cargados[i] || 0,
-        (tiempoCarga[i] || 0).toFixed(2),
-        (avisoRetiro[i] || 0).toFixed(2),
-        (avisoPostura[i] || 0).toFixed(2),
-        (tasaCarga[i] || 0).toFixed(2),
-        (eficiencia[i] || 0).toFixed(2)
-      ];
+     const datos = [
+  subtrenadas[i] || "",
+  lineas[i] || "",
+  formatDateTime(postura[i]),
+  formatDateTime(aviso[i]),
+  formatDateTime(retiro[i]),
+  cargados[i] || 0,
+  (tiempoCarga[i] || 0).toFixed(2),          // sigue mostrando 2 decimales
+  Math.round(avisoRetiro[i] || 0),           // ⏱ entero sin decimales
+  Math.round(avisoPostura[i] || 0),          // ⏱ entero sin decimales
+  (tasaCarga[i] || 0).toFixed(2),
+  (eficiencia[i] || 0).toFixed(2)
+];
+
 
       totalCarros += cargados[i] || 0;
       promTasa += tasaCarga[i] || 0;
