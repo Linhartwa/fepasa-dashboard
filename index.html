@@ -24,14 +24,23 @@
       letter-spacing: 0.5px;
     }
 
-    section {
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 20px;
       margin: 25px auto;
-      width: 90%;
-      max-width: 1000px;
+      width: 95%;
+      max-width: 1200px;
+    }
+
+    .chart-card {
       background: white;
       border-radius: 10px;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-      padding: 25px;
+      padding: 20px;
+      flex: 1 1 500px;
+      max-width: 560px;
     }
 
     h2 {
@@ -41,21 +50,19 @@
     }
 
     canvas {
-      display: block;
-      margin: 0 auto 10px;
       width: 100% !important;
-      height: 360px !important; /* más alto */
+      height: 300px !important;
     }
 
     table {
-      width: 95%;
+      width: 100%;
       border-collapse: collapse;
-      margin: 25px auto;
-      font-size: 0.9em;
+      font-size: 0.85em;
       background: #fff;
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      margin-top: 15px;
     }
 
     table thead {
@@ -64,7 +71,7 @@
     }
 
     th, td {
-      padding: 10px 8px;
+      padding: 8px 6px;
       text-align: center;
       border-bottom: 1px solid #ddd;
     }
@@ -83,23 +90,24 @@
 <body>
   <header>📊 Dashboard Operacional – FEPASA</header>
 
-  <section>
-    <h2>Tasa de Carga por Subtrenada</h2>
-    <canvas id="graficoTasa"></canvas>
-  </section>
+  <div class="dashboard">
+    <!-- Gráfico 1 -->
+    <div class="chart-card">
+      <h2>Tasa de Carga</h2>
+      <canvas id="graficoTasa"></canvas>
+      <div id="tablaTasa"></div>
+    </div>
 
-  <section>
-    <h2>Tiempos de Proceso</h2>
-    <canvas id="graficoTiempo"></canvas>
-  </section>
-
-  <section>
-    <h2>Resumen de Subtrenadas</h2>
-    <div id="tablaResumen"></div>
-  </section>
+    <!-- Gráfico 2 -->
+    <div class="chart-card">
+      <h2>Tiempos de Proceso (min)</h2>
+      <canvas id="graficoTiempo"></canvas>
+      <div id="tablaTiempo"></div>
+    </div>
+  </div>
 
   <script>
-    // 🧩 Leer parámetros de la URL
+    // Leer parámetros
     const params = new URLSearchParams(window.location.search);
 
     const subtrenadas = params.get("subtrenadas")?.split(",") || [];
@@ -108,10 +116,10 @@
     const retiro = (params.get("retiro")?.split(",").map(Number)) || [];
     const postura = (params.get("postura")?.split(",").map(Number)) || [];
 
-    // 🧮 Función promedio
+    // Promedio
     const promedio = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
 
-    // 🟦 GRAFICO 1 — TASA DE CARGA
+    // 🎯 GRAFICO TASA
     const ctx1 = document.getElementById('graficoTasa').getContext('2d');
     new Chart(ctx1, {
       type: 'bar',
@@ -154,15 +162,15 @@
       }
     });
 
-    // 🟪 GRAFICO 2 — TIEMPOS DE PROCESO
+    // 🎯 GRAFICO TIEMPO (en minutos)
     const ctx2 = document.getElementById('graficoTiempo').getContext('2d');
     new Chart(ctx2, {
       type: 'bar',
       data: {
         labels: subtrenadas,
         datasets: [
-          { label: 'Aviso - Retiro (h)', data: retiro, backgroundColor: '#0dcaf0' },
-          { label: 'Retiro - Postura (h)', data: postura, backgroundColor: '#6610f2' }
+          { label: 'Aviso - Retiro (min)', data: retiro, backgroundColor: '#0dcaf0' },
+          { label: 'Retiro - Postura (min)', data: postura, backgroundColor: '#6610f2' }
         ]
       },
       options: {
@@ -170,37 +178,43 @@
           legend: { position: 'bottom' },
           tooltip: {
             callbacks: {
-              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} h`
+              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)} min`
             }
           }
         },
         scales: {
           x: { title: { display: true, text: 'Subtrenada Planificada' } },
-          y: { title: { display: true, text: 'Duración (h)' }, beginAtZero: true }
+          y: { title: { display: true, text: 'Duración (min)' }, beginAtZero: true }
         }
       }
     });
 
-    // 📋 TABLA RESUMEN
-    let html = "<table><thead><tr><th>Subtrenada</th><th>Tasa L2</th><th>Tasa L3</th><th>Aviso-Retiro (h)</th><th>Retiro-Postura (h)</th></tr></thead><tbody>";
+    // 🧾 TABLA TASA
+    let htmlTasa = "<table><thead><tr><th>Subtrenada</th><th>Tasa L2</th><th>Tasa L3</th></tr></thead><tbody>";
     for (let i = 0; i < subtrenadas.length; i++) {
-      html += `<tr>
+      htmlTasa += `<tr>
         <td>${subtrenadas[i] || "-"}</td>
         <td>${tasaL2[i]?.toFixed(2) || "-"}</td>
         <td>${tasaL3[i]?.toFixed(2) || "-"}</td>
-        <td>${retiro[i]?.toFixed(2) || "-"}</td>
-        <td>${postura[i]?.toFixed(2) || "-"}</td>
       </tr>`;
     }
-    html += "</tbody><tfoot><tr><td><b>Promedio</b></td>";
-    html += `<td>${promedio(tasaL2).toFixed(2)}</td>`;
-    html += `<td>${promedio(tasaL3).toFixed(2)}</td>`;
-    html += `<td>${promedio(retiro).toFixed(2)}</td>`;
-    html += `<td>${promedio(postura).toFixed(2)}</td>`;
-    html += "</tr></tfoot></table>";
-    document.getElementById("tablaResumen").innerHTML = html;
+    htmlTasa += `</tbody><tfoot><tr><td><b>Promedio</b></td><td>${promedio(tasaL2).toFixed(2)}</td><td>${promedio(tasaL3).toFixed(2)}</td></tr></tfoot></table>`;
+    document.getElementById("tablaTasa").innerHTML = htmlTasa;
+
+    // 🧾 TABLA TIEMPOS
+    let htmlTiempo = "<table><thead><tr><th>Subtrenada</th><th>Aviso - Retiro (min)</th><th>Retiro - Postura (min)</th></tr></thead><tbody>";
+    for (let i = 0; i < subtrenadas.length; i++) {
+      htmlTiempo += `<tr>
+        <td>${subtrenadas[i] || "-"}</td>
+        <td>${retiro[i]?.toFixed(0) || "-"}</td>
+        <td>${postura[i]?.toFixed(0) || "-"}</td>
+      </tr>`;
+    }
+    htmlTiempo += `</tbody><tfoot><tr><td><b>Promedio</b></td><td>${promedio(retiro).toFixed(0)}</td><td>${promedio(postura).toFixed(0)}</td></tr></tfoot></table>`;
+    document.getElementById("tablaTiempo").innerHTML = htmlTiempo;
   </script>
 </body>
 </html>
+
 
 
