@@ -23,13 +23,8 @@
       height: 50px;
       margin-right: 15px;
     }
-    h1 {
-      font-size: 22px;
-      margin: 0;
-    }
-    .container {
-      padding: 24px;
-    }
+    h1 { font-size: 22px; margin: 0; }
+    .container { padding: 24px; }
     .charts {
       display: flex;
       gap: 30px;
@@ -44,10 +39,7 @@
       flex: 1 1 45%;
       min-width: 400px;
     }
-    canvas {
-      width: 100%;
-      height: 320px;
-    }
+    canvas { width: 100%; height: 320px; }
     table {
       border-collapse: collapse;
       width: 100%;
@@ -115,20 +107,8 @@
   <script>
     const params = new URLSearchParams(window.location.search);
 
-    const parseNumList = (str) => {
-      return (str || "")
-        .replace(/%20/g, " ")
-        .split(",")
-        .map(s => Number(s.trim()))
-        .filter(n => !isNaN(n));
-    };
-
-    const parseTextList = (str) => {
-      return (str || "")
-        .replace(/%20/g, " ")
-        .split(",")
-        .map(s => s.trim());
-    };
+    const parseNumList = (str) => (str || "").replace(/%20/g, " ").split(",").map(s => Number(s.trim())).filter(n => !isNaN(n));
+    const parseTextList = (str) => (str || "").replace(/%20/g, " ").split(",").map(s => s.trim());
 
     const tren = params.get("tren") || "";
     const subtrenadas = parseTextList(params.get("subtrenadas"));
@@ -137,7 +117,6 @@
     const aviso = parseTextList(params.get("aviso"));
     const retiro = parseTextList(params.get("retiro"));
     const cargados = parseNumList(params.get("cargados"));
-    const tiempoCarga = parseNumList(params.get("tiempoCarga"));
     const avisoRetiro = parseNumList(params.get("avisoRetiro"));
     const avisoPostura = parseNumList(params.get("avisoPostura"));
     const tasaCarga = parseNumList(params.get("tasaCarga"));
@@ -145,23 +124,25 @@
 
     document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren}`;
 
+    // Formato de fecha
     const formatDateTime = (dt) => {
       if (!dt || dt === "null" || dt === "") return "-";
       const parsed = new Date(dt);
       if (isNaN(parsed.getTime())) return dt;
       return parsed.toLocaleString("es-CL", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
       });
     };
 
-    // 🔹 Función para convertir minutos a formato hh:mm
-    const formatTimeHHMM = (minutes) => {
-      const h = Math.floor(minutes / 60);
-      const m = Math.floor(minutes % 60);
+    // Calcular diferencia en hh:mm
+    const calcDiffHHMM = (start, end) => {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      if (isNaN(startDate) || isNaN(endDate)) return "-";
+      const diffMin = Math.floor((startDate - endDate) / 60000);
+      const h = Math.floor(Math.abs(diffMin) / 60);
+      const m = Math.abs(diffMin) % 60;
       return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     };
 
@@ -171,6 +152,8 @@
     for (let i = 0; i < subtrenadas.length; i++) {
       const fila = document.createElement("tr");
 
+      const tiempoCargaHHMM = calcDiffHHMM(postura[i], aviso[i]);
+
       const datos = [
         subtrenadas[i] || "",
         lineas[i] || "",
@@ -178,7 +161,7 @@
         formatDateTime(aviso[i]),
         formatDateTime(retiro[i]),
         cargados[i] || 0,
-        formatTimeHHMM(tiempoCarga[i] || 0),  // ⏱ en formato hh:mm
+        tiempoCargaHHMM,  // 🔹 calculado dinámicamente
         Math.round(avisoRetiro[i] || 0),
         Math.round(avisoPostura[i] || 0),
         (tasaCarga[i] || 0).toFixed(2),
@@ -248,18 +231,12 @@
           {
             label: "Diseño L2 (5.45)",
             data: subtrenadas.map(() => 5.45),
-            borderColor: "blue",
-            borderWidth: 2,
-            type: "line",
-            fill: false
+            borderColor: "blue", borderWidth: 2, type: "line", fill: false
           },
           {
             label: "Diseño L3 (7.11)",
             data: subtrenadas.map(() => 7.11),
-            borderColor: "orange",
-            borderWidth: 2,
-            type: "line",
-            fill: false
+            borderColor: "orange", borderWidth: 2, type: "line", fill: false
           }
         ]
       },
@@ -279,49 +256,18 @@
       data: {
         labels: subtrenadas,
         datasets: [
-          {
-            label: "Aviso - Retiro (min)",
-            data: avisoRetiro.map(v => Math.round(v || 0)),
-            backgroundColor: "rgba(0, 150, 255, 0.7)"
-          },
-          {
-            label: "Retiro - Postura (min)",
-            data: avisoPostura.map(v => Math.round(v || 0)),
-            backgroundColor: "rgba(255, 150, 50, 0.8)"
-          }
+          { label: "Aviso - Retiro (min)", data: avisoRetiro.map(v => Math.round(v || 0)), backgroundColor: "rgba(0,150,255,0.7)" },
+          { label: "Retiro - Postura (min)", data: avisoPostura.map(v => Math.round(v || 0)), backgroundColor: "rgba(255,150,50,0.8)" }
         ]
       },
       options: {
         plugins: { legend: { position: "bottom" } },
         scales: {
-          y: {
-            beginAtZero: true,
-            title: { display: true, text: "Tiempo (minutos)" },
-            ticks: {
-              stepSize: 1,
-              callback: (value) => Math.round(value)
-            }
-          },
+          y: { beginAtZero: true, title: { display: true, text: "Tiempo (minutos)" } },
           x: { title: { display: true, text: "Subtrenadas" } }
         }
       },
-      plugins: [{
-        id: 'mostrarValoresTiempos',
-        afterDatasetsDraw(chart) {
-          const { ctx } = chart;
-          chart.data.datasets.forEach((dataset, i) => {
-            chart.getDatasetMeta(i).data.forEach((bar, index) => {
-              const value = dataset.data[index];
-              if (value && value > 0) {
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold 12px Segoe UI';
-                ctx.textAlign = 'center';
-                ctx.fillText(Math.round(value), bar.x, bar.y - 5);
-              }
-            });
-          });
-        }
-      }]
+      plugins: [mostrarValores]
     });
   </script>
 </body>
