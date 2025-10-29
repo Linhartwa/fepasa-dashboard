@@ -113,7 +113,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Obtener parámetros desde la URL
+    // === Obtener parámetros desde el enlace ===
     const params = new URLSearchParams(window.location.search);
 
     const tren = params.get("tren") || "";
@@ -131,11 +131,11 @@
 
     document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren}`;
 
-    // Función para formatear fecha/hora correctamente
+    // === Formato de fecha/hora ===
     const formatDateTime = (dt) => {
       if (!dt || dt === "null" || dt === "") return "-";
       const parsed = new Date(dt);
-      if (isNaN(parsed.getTime())) return dt; // si ya viene formateado
+      if (isNaN(parsed.getTime())) return dt; 
       return parsed.toLocaleString("es-CL", {
         day: "2-digit",
         month: "2-digit",
@@ -145,7 +145,7 @@
       });
     };
 
-    // Construcción de tabla
+    // === Construcción de tabla ===
     const tbody = document.querySelector("#tablaDatos tbody");
     let totalCarros = 0, promTasa = 0, promEficiencia = 0;
 
@@ -178,7 +178,7 @@
       tbody.appendChild(fila);
     }
 
-    // Fila resumen
+    // === Fila resumen ===
     const tfoot = document.getElementById("resumen");
     if (subtrenadas.length > 0) {
       const filaResumen = document.createElement("tr");
@@ -192,13 +192,13 @@
       tfoot.appendChild(filaResumen);
     }
 
-    // === PLUGIN PARA MOSTRAR VALORES SOBRE LAS BARRAS ===
+    // === Plugin para mostrar valores sobre las barras ===
     const mostrarValores = {
       id: 'mostrarValores',
       afterDatasetsDraw(chart) {
         const { ctx } = chart;
         chart.data.datasets.forEach((dataset, i) => {
-          if (dataset.type === "line") return; // ignorar líneas
+          if (dataset.type === "line") return;
           chart.getDatasetMeta(i).data.forEach((bar, index) => {
             const value = dataset.data[index];
             if (value && value > 0) {
@@ -212,7 +212,7 @@
       }
     };
 
-    // === GRÁFICO 1: Tasa de carga ===
+    // === Gráfico 1: Tasa de Carga ===
     new Chart(document.getElementById("tasaCargaChart"), {
       type: "bar",
       data: {
@@ -220,12 +220,12 @@
         datasets: [
           {
             label: "Tasa Carga L2",
-            data: lineas.map((l, i) => l === "L2" ? tasaCarga[i] : 0),
+            data: lineas.map((l, i) => (l === "L2" || l === "2") ? tasaCarga[i] : 0),
             backgroundColor: "rgba(0, 99, 255, 0.7)"
           },
           {
             label: "Tasa Carga L3",
-            data: lineas.map((l, i) => l === "L3" ? tasaCarga[i] : 0),
+            data: lineas.map((l, i) => (l === "L3" || l === "3") ? tasaCarga[i] : 0),
             backgroundColor: "rgba(255, 206, 86, 0.8)"
           },
           {
@@ -258,7 +258,7 @@
       plugins: [mostrarValores]
     });
 
-    // === GRÁFICO 2: Tiempos ===
+    // === Gráfico 2: Tiempos ===
     new Chart(document.getElementById("tiempoChart"), {
       type: "bar",
       data: {
