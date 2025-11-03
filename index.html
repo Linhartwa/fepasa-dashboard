@@ -131,21 +131,19 @@
     };
 
     const tren = params.get("tren") || "";
-    const folio = params.get("folio") || ""; // ✅ NUEVA LÍNEA
+    const folio = params.get("folio") || "";
     const subtrenadas = parseTextList(params.get("subtrenadas"));
     const lineas = parseTextList(params.get("linea"));
     const postura = parseTextList(params.get("postura"));
     const aviso = parseTextList(params.get("aviso"));
     const retiro = parseTextList(params.get("retiro"));
     const cargados = parseNumList(params.get("cargados"));
-    const tiempoCarga = parseNumList(params.get("tiempoCarga"));
     const avisoRetiro = parseNumList(params.get("avisoRetiro"));
     const avisoPostura = parseNumList(params.get("avisoPostura"));
     const tasaCarga = parseNumList(params.get("tasaCarga"));
     const eficiencia = parseNumList(params.get("eficiencia"));
 
-    // ✅ Modificada: muestra el FOLIO si existe
-    document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren}${folio ? " (" + folio + ")" : ""}`;
+    document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren} (${folio || "sin folio"})`;
 
     const formatDateTime = (dt) => {
       if (!dt || dt === "null" || dt === "") return "-";
@@ -160,6 +158,16 @@
       });
     };
 
+    // 🔹 Calcular tiempo de carga (postura - aviso)
+    const calcularTiempoCarga = (inicio, fin) => {
+      if (!inicio || !fin) return 0;
+      const start = new Date(inicio);
+      const end = new Date(fin);
+      const diffMs = end - start;
+      return diffMs > 0 ? diffMs / 60000 : 0; // minutos
+    };
+
+    // 🔹 Formato hh:mm
     const formatTimeHHMM = (minutes) => {
       const h = Math.floor(minutes / 60);
       const m = Math.floor(minutes % 60);
@@ -170,8 +178,9 @@
     let totalCarros = 0, promTasa = 0, promEficiencia = 0;
 
     for (let i = 0; i < subtrenadas.length; i++) {
-      const fila = document.createElement("tr");
+      const minutosCarga = calcularTiempoCarga(postura[i], aviso[i]);
 
+      const fila = document.createElement("tr");
       const datos = [
         subtrenadas[i] || "",
         lineas[i] || "",
@@ -179,7 +188,7 @@
         formatDateTime(aviso[i]),
         formatDateTime(retiro[i]),
         cargados[i] || 0,
-        formatTimeHHMM(tiempoCarga[i] || 0),  // ⏱ en formato hh:mm
+        formatTimeHHMM(minutosCarga),
         Math.round(avisoRetiro[i] || 0),
         Math.round(avisoPostura[i] || 0),
         (tasaCarga[i] || 0).toFixed(2),
@@ -202,7 +211,7 @@
     if (subtrenadas.length > 0) {
       const filaResumen = document.createElement("tr");
       filaResumen.innerHTML = `
-        <td colspan="5"><strong>Resumen del Tren ${tren}${folio ? " (" + folio + ")" : ""}</strong></td>
+        <td colspan="5"><strong>Resumen del Tren ${tren}</strong></td>
         <td>${totalCarros.toFixed(0)}</td>
         <td colspan="3"></td>
         <td>${(promTasa / subtrenadas.length).toFixed(2)}</td>
@@ -306,23 +315,7 @@
           x: { title: { display: true, text: "Subtrenadas" } }
         }
       },
-      plugins: [{
-        id: 'mostrarValoresTiempos',
-        afterDatasetsDraw(chart) {
-          const { ctx } = chart;
-          chart.data.datasets.forEach((dataset, i) => {
-            chart.getDatasetMeta(i).data.forEach((bar, index) => {
-              const value = dataset.data[index];
-              if (value && value > 0) {
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold 12px Segoe UI';
-                ctx.textAlign = 'center';
-                ctx.fillText(Math.round(value), bar.x, bar.y - 5);
-              }
-            });
-          });
-        }
-      }]
+      plugins: [mostrarValores]
     });
   </script>
 </body>
