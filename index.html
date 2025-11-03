@@ -131,7 +131,7 @@
     };
 
     const tren = params.get("tren") || "";
-    const folio = params.get("folio") || "";
+    const folio = params.get("folio") || ""; // ✅ NUEVA LÍNEA
     const subtrenadas = parseTextList(params.get("subtrenadas"));
     const lineas = parseTextList(params.get("linea"));
     const postura = parseTextList(params.get("postura"));
@@ -144,6 +144,7 @@
     const tasaCarga = parseNumList(params.get("tasaCarga"));
     const eficiencia = parseNumList(params.get("eficiencia"));
 
+    // ✅ Modificada: muestra el FOLIO si existe
     document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren}${folio ? " (" + folio + ")" : ""}`;
 
     const formatDateTime = (dt) => {
@@ -178,7 +179,7 @@
         formatDateTime(aviso[i]),
         formatDateTime(retiro[i]),
         cargados[i] || 0,
-        formatTimeHHMM(tiempoCarga[i] || 0),
+        formatTimeHHMM(tiempoCarga[i] || 0),  // ⏱ en formato hh:mm
         Math.round(avisoRetiro[i] || 0),
         Math.round(avisoPostura[i] || 0),
         (tasaCarga[i] || 0).toFixed(2),
@@ -209,7 +210,120 @@
       `;
       tfoot.appendChild(filaResumen);
     }
+
+    const mostrarValores = {
+      id: 'mostrarValores',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        chart.data.datasets.forEach((dataset, i) => {
+          if (dataset.type === "line") return;
+          chart.getDatasetMeta(i).data.forEach((bar, index) => {
+            const value = dataset.data[index];
+            if (value && value > 0) {
+              ctx.fillStyle = '#000';
+              ctx.font = 'bold 12px Segoe UI';
+              ctx.textAlign = 'center';
+              ctx.fillText(value % 1 === 0 ? value : value.toFixed(2), bar.x, bar.y - 5);
+            }
+          });
+        });
+      }
+    };
+
+    // === Gráfico 1: Tasa de Carga ===
+    new Chart(document.getElementById("tasaCargaChart"), {
+      type: "bar",
+      data: {
+        labels: subtrenadas,
+        datasets: [
+          {
+            label: "Tasa Carga L2",
+            data: lineas.map((l, i) => (l === "L2" || l === "2") ? tasaCarga[i] : 0),
+            backgroundColor: "rgba(0, 99, 255, 0.7)"
+          },
+          {
+            label: "Tasa Carga L3",
+            data: lineas.map((l, i) => (l === "L3" || l === "3") ? tasaCarga[i] : 0),
+            backgroundColor: "rgba(255, 206, 86, 0.8)"
+          },
+          {
+            label: "Diseño L2 (5.45)",
+            data: subtrenadas.map(() => 5.45),
+            borderColor: "blue",
+            borderWidth: 2,
+            type: "line",
+            fill: false
+          },
+          {
+            label: "Diseño L3 (7.11)",
+            data: subtrenadas.map(() => 7.11),
+            borderColor: "orange",
+            borderWidth: 2,
+            type: "line",
+            fill: false
+          }
+        ]
+      },
+      options: {
+        plugins: { legend: { position: "bottom" } },
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: "Tasa de Carga (car/h)" } },
+          x: { title: { display: true, text: "Subtrenadas" } }
+        }
+      },
+      plugins: [mostrarValores]
+    });
+
+    // === Gráfico 2: Tiempos ===
+    new Chart(document.getElementById("tiempoChart"), {
+      type: "bar",
+      data: {
+        labels: subtrenadas,
+        datasets: [
+          {
+            label: "Aviso - Retiro (min)",
+            data: avisoRetiro.map(v => Math.round(v || 0)),
+            backgroundColor: "rgba(0, 150, 255, 0.7)"
+          },
+          {
+            label: "Retiro - Postura (min)",
+            data: avisoPostura.map(v => Math.round(v || 0)),
+            backgroundColor: "rgba(255, 150, 50, 0.8)"
+          }
+        ]
+      },
+      options: {
+        plugins: { legend: { position: "bottom" } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: "Tiempo (minutos)" },
+            ticks: {
+              stepSize: 1,
+              callback: (value) => Math.round(value)
+            }
+          },
+          x: { title: { display: true, text: "Subtrenadas" } }
+        }
+      },
+      plugins: [{
+        id: 'mostrarValoresTiempos',
+        afterDatasetsDraw(chart) {
+          const { ctx } = chart;
+          chart.data.datasets.forEach((dataset, i) => {
+            chart.getDatasetMeta(i).data.forEach((bar, index) => {
+              const value = dataset.data[index];
+              if (value && value > 0) {
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 12px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText(Math.round(value), bar.x, bar.y - 5);
+              }
+            });
+          });
+        }
+      }]
+    });
   </script>
 </body>
 </html>
-
