@@ -150,4 +150,84 @@
 
   <section id="cap5">
     <h2>Actividad Final</h2>
-    <p>¡Excelente! Has completado todos los ejercicios 🎉
+    <p>¡Excelente! Has completado todos los ejercicios 🎉</p>
+    <p>Recuerda seguir practicando cada día.</p>
+  </section>
+
+  <div class="footer">© 2025 FEPASA | Guía Matemática Infantil – Linhart</div>
+</main>
+
+<script>
+  // navegación entre capítulos
+  const links = document.querySelectorAll('nav a');
+  const caps = document.querySelectorAll('section');
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      links.forEach(l => l.classList.remove('active'));
+      caps.forEach(c => c.classList.remove('active'));
+      link.classList.add('active');
+      document.getElementById(link.dataset.target).classList.add('active');
+    });
+  });
+
+  // funciones interactivas
+  function checkNumeros() {
+    const n1 = document.getElementById("n1").value;
+    const n2 = document.getElementById("n2").value;
+    const f = document.getElementById("f1");
+    if (n1 == "30" && n2 == "50") {
+      f.innerHTML = "✅ ¡Muy bien! Has completado la secuencia.";
+      f.className = "feedback ok";
+    } else {
+      f.innerHTML = "❌ Revisa los números faltantes.";
+      f.className = "feedback bad";
+    }
+  }
+
+  function checkSumas() {
+    const a = document.getElementById("s1").value == "5";
+    const b = document.getElementById("s2").value == "5";
+    const c = document.getElementById("s3").value == "9";
+    const f = document.getElementById("f2");
+    if (a && b && c) {
+      f.innerHTML = "✅ ¡Excelente trabajo!";
+      f.className = "feedback ok";
+    } else {
+      f.innerHTML = "❌ Revisa tus cálculos.";
+      f.className = "feedback bad";
+    }
+  }
+
+  function checkComp() {
+    const sel = document.getElementById("cmp").value;
+    const f = document.getElementById("f3");
+    if (sel === "B") {
+      f.innerHTML = "✅ Correcto, 52 es el número mayor.";
+      f.className = "feedback ok";
+    } else {
+      f.innerHTML = "❌ Inténtalo de nuevo.";
+      f.className = "feedback bad";
+    }
+  }
+
+  function checkFig() {
+    const sel = document.querySelector('input[name="fig"]:checked');
+    const f = document.getElementById("f4");
+    if (!sel) {
+      f.innerHTML = "Selecciona una opción.";
+      return;
+    }
+    if (sel.value === "triangulo") {
+      f.innerHTML = "✅ Muy bien, el triángulo tiene 3 lados iguales.";
+      f.className = "feedback ok";
+    } else {
+      f.innerHTML = "❌ No es correcto, inténtalo otra vez.";
+      f.className = "feedback bad";
+    }
+  }
+</script>
+
+</body>
+</html>
