@@ -1,105 +1,215 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guía de Matemática Infantil</title>
-  <style>
-    body {
-      font-family: "Arial", sans-serif;
-      background-color: #fff;
-      color: #222;
-      margin: 30px auto;
-      max-width: 800px;
-      line-height: 1.6;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Guía de Matemática Infantil – FEPASA</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(180deg, #e6f4ff 0%, #ffffff 100%);
+    color: #222;
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+  }
+
+  /* Menú lateral */
+  aside {
+    width: 220px;
+    background: #005bb5;
+    color: white;
+    padding: 20px;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+  }
+
+  aside h1 {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  nav a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: 0.3s;
+  }
+
+  nav a:hover, nav a.active {
+    background: #338af0;
+  }
+
+  /* Contenido principal */
+  main {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+  }
+
+  .capitulo {
+    display: none;
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    animation: fade 0.3s ease-in-out;
+  }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .capitulo.active {
+    display: block;
+  }
+
+  h2 {
+    color: #005bb5;
+  }
+
+  ol, ul {
+    line-height: 1.7;
+    margin-left: 20px;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.85em;
+    color: #666;
+  }
+
+  /* Responsive */
+  @media (max-width: 800px) {
+    aside {
+      width: 100%;
+      text-align: center;
     }
-    h1, h2 {
-      color: #0055aa;
+    nav a {
+      display: inline-block;
+      margin: 4px;
     }
-    hr {
-      border: 0;
-      border-top: 2px solid #0055aa;
-      margin: 30px 0;
+    main {
+      padding: 15px;
     }
-  </style>
+  }
+</style>
 </head>
+
 <body>
 
-  <h1>Guía de Matemática Infantil – Nivel 1</h1>
-  <p><strong>Edad recomendada:</strong> 6 años</p>
+<aside>
+  <h1>📘 Guía Infantil</h1>
+  <nav id="menu">
+    <a href="#" class="active" data-target="cap1">1️⃣ Numeración</a>
+    <a href="#" data-target="cap2">2️⃣ Figuras</a>
+    <a href="#" data-target="cap3">3️⃣ Longitudes</a>
+    <a href="#" data-target="cap4">4️⃣ Operaciones</a>
+    <a href="#" data-target="cap5">5️⃣ Sumas y Restas</a>
+    <a href="#" data-target="cap6">6️⃣ Ordinales</a>
+    <a href="#" data-target="cap7">7️⃣ Pictogramas</a>
+  </nav>
+</aside>
 
-  <hr>
-  <h2>Capítulo 1: Numeración del 0 al 100</h2>
-  <p><strong>Objetivo:</strong> Reconocer, leer y escribir números hasta el 100.</p>
-  <ol>
-    <li>Escribe los números del 0 al 20.</li>
-    <li>Completa: 12, 13, ___, 15, ___, 17</li>
-    <li>Cuenta de 10 en 10: 10, 20, ___, ___, ___, 60, ___, ___, 90, 100</li>
-    <li>Rodea el número más grande: 24 - 31 - 19 - 40</li>
-    <li>Antes de 36: ___ / Después de 36: ___</li>
-  </ol>
+<main>
+  <div id="cap1" class="capitulo active">
+    <h2>Capítulo 1: Numeración del 0 al 100</h2>
+    <p><strong>Objetivo:</strong> Reconocer, leer y escribir números hasta el 100.</p>
+    <ol>
+      <li>Escribe los números del 0 al 20.</li>
+      <li>Completa: 12, 13, ___, 15, ___, 17.</li>
+      <li>Cuenta de 10 en 10: 10, 20, ___, ___, 60, ___, 100.</li>
+      <li>Rodea el número más grande: 24 - 31 - 19 - 40.</li>
+    </ol>
+  </div>
 
-  <hr>
-  <h2>Capítulo 2: Figuras 2D y 3D</h2>
-  <p><strong>Objetivo:</strong> Reconocer formas planas y con volumen.</p>
-  <ul>
-    <li>Dibuja un círculo, cuadrado y triángulo.</li>
-    <li>Dibuja un cubo, esfera y cilindro.</li>
-    <li>Pelota → Esfera / Caja → Cubo / Reloj → Círculo</li>
-  </ul>
+  <div id="cap2" class="capitulo">
+    <h2>Capítulo 2: Figuras 2D y 3D</h2>
+    <p><strong>Objetivo:</strong> Reconocer formas planas y con volumen.</p>
+    <ul>
+      <li>Dibuja un círculo, cuadrado y triángulo.</li>
+      <li>Dibuja un cubo, esfera y cilindro.</li>
+      <li>Pelota → Esfera / Caja → Cubo / Reloj → Círculo</li>
+    </ul>
+  </div>
 
-  <hr>
-  <h2>Capítulo 3: Longitudes</h2>
-  <ul>
-    <li>Dibuja dos lápices: uno largo y otro corto.</li>
-    <li>Marca con ✔ cuál es más alto: Niño (1,30 m) / Niña (1,10 m).</li>
-    <li>Colorea de azul el objeto más corto y de rojo el más largo.</li>
-  </ul>
+  <div id="cap3" class="capitulo">
+    <h2>Capítulo 3: Longitudes</h2>
+    <ul>
+      <li>Dibuja dos lápices: uno largo y otro corto.</li>
+      <li>Marca con ✔ cuál es más alto: Niño (1,30 m) / Niña (1,10 m).</li>
+      <li>Colorea de azul el objeto más corto y de rojo el más largo.</li>
+    </ul>
+  </div>
 
-  <hr>
-  <h2>Capítulo 4: Familia de Operaciones</h2>
-  <p><strong>Objetivo:</strong> Comprender la relación entre suma y resta.</p>
-  <pre>
+  <div id="cap4" class="capitulo">
+    <h2>Capítulo 4: Familia de Operaciones</h2>
+    <p><strong>Objetivo:</strong> Comprender la relación entre suma y resta.</p>
+    <pre>
 3 + 2 = 5
 5 - 2 = 3
 5 - 3 = 2
-  </pre>
-  <p>Completa la familia:</p>
-  <ul>
-    <li>4 + 3 = ___</li>
-    <li>3 + 4 = ___</li>
-    <li>7 - 4 = ___</li>
-    <li>7 - 3 = ___</li>
-  </ul>
+    </pre>
+  </div>
 
-  <hr>
-  <h2>Capítulo 5: Sumas y Restas</h2>
-  <pre>
+  <div id="cap5" class="capitulo">
+    <h2>Capítulo 5: Sumas y Restas</h2>
+    <pre>
 3 + 2 = ___
 5 + 4 = ___
 9 - 3 = ___
 8 - 2 = ___
 6 + 1 = ___
-  </pre>
+    </pre>
+  </div>
 
-  <hr>
-  <h2>Capítulo 6: Números Ordinales</h2>
-  <ol>
-    <li>1° perro</li>
-    <li>2° gato</li>
-    <li>3° conejo</li>
-  </ol>
-  <p>¿Quién va primero? ______ / ¿Quién va tercero? ______</p>
+  <div id="cap6" class="capitulo">
+    <h2>Capítulo 6: Números Ordinales</h2>
+    <ol>
+      <li>1° perro</li>
+      <li>2° gato</li>
+      <li>3° conejo</li>
+    </ol>
+    <p>¿Quién va primero? ______ / ¿Quién va tercero? ______</p>
+  </div>
 
-  <hr>
-  <h2>Capítulo 7: Tablas y Pictogramas</h2>
-  <table border="1" cellpadding="6">
-    <tr><th>Fruta</th><th>Cantidad</th></tr>
-    <tr><td>Manzanas</td><td>3</td></tr>
-    <tr><td>Plátanos</td><td>2</td></tr>
-    <tr><td>Uvas</td><td>4</td></tr>
-  </table>
-  <p>¿Qué fruta hay más? ______ / ¿Qué fruta hay menos? ______</p>
+  <div id="cap7" class="capitulo">
+    <h2>Capítulo 7: Tablas y Pictogramas</h2>
+    <table border="1" cellpadding="6">
+      <tr><th>Fruta</th><th>Cantidad</th></tr>
+      <tr><td>Manzanas</td><td>🍎🍎🍎</td></tr>
+      <tr><td>Plátanos</td><td>🍌🍌</td></tr>
+      <tr><td>Uvas</td><td>🍇🍇🍇🍇</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">
+    Hecho con cariño para aprender jugando 💫<br>
+    © FEPASA Dashboard | Linhart 2025
+  </div>
+</main>
+
+<script>
+  const links = document.querySelectorAll('nav a');
+  const caps = document.querySelectorAll('.capitulo');
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      links.forEach(l => l.classList.remove('active'));
+      caps.forEach(c => c.classList.remove('active'));
+      link.classList.add('active');
+      document.getElementById(link.dataset.target).classList.add('active');
+    });
+  });
+</script>
 
 </body>
 </html>
