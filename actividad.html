@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Matemática Infantil Interactiva – FEPASA</title>
-
+<title>Guía Interactiva de Matemática – por Karina</title>
 <style>
   body {
     margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(180deg, #e6f4ff 0%, #ffffff 100%);
+    font-family: "Poppins", sans-serif;
+    background: #f5f7fa;
     display: flex;
     color: #222;
+    height: 100vh;
   }
   aside {
     width: 240px;
-    background: #004c99;
+    background: #007bff;
     color: white;
     padding: 20px;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
   }
   aside h1 {
     font-size: 1.2em;
@@ -29,14 +31,27 @@
     display: block;
     padding: 10px;
     margin: 5px 0;
-    background: #0066cc;
+    background: rgba(255,255,255,0.15);
     border-radius: 10px;
     text-decoration: none;
     color: white;
     transition: 0.3s;
   }
   nav a:hover, nav a.active {
-    background: #338af0;
+    background: #ffffff33;
+  }
+  .progress-bar {
+    height: 10px;
+    background: #ffffff55;
+    border-radius: 5px;
+    margin-top: 10px;
+  }
+  .progress {
+    height: 10px;
+    background: #00ff88;
+    border-radius: 5px;
+    width: 0%;
+    transition: width 0.3s ease-in-out;
   }
   main {
     flex: 1;
@@ -51,24 +66,22 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     animation: fade 0.4s ease;
   }
-  section.active {
-    display: block;
-  }
-  @keyframes fade { from {opacity: 0;} to {opacity: 1;} }
-  h2 { color: #004c99; }
-  input {
+  section.active { display: block; }
+  @keyframes fade { from {opacity:0;} to {opacity:1;} }
+  h2 { color: #007bff; }
+  input, select {
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 5px 10px;
-    margin: 3px;
+    margin: 4px;
   }
   button {
     background: #007bff;
     color: white;
     border: none;
     border-radius: 10px;
-    padding: 8px 14px;
-    margin-top: 8px;
+    padding: 8px 16px;
+    margin-top: 10px;
     cursor: pointer;
     transition: 0.3s;
   }
@@ -77,47 +90,55 @@
     margin-top: 10px;
     font-weight: bold;
   }
-  .ok { color: green; }
-  .bad { color: red; }
+  .ok { color: #009933; }
+  .bad { color: #cc0000; }
   .footer {
     text-align: center;
     font-size: 0.8em;
     color: #555;
-    margin-top: 30px;
+    margin-top: 25px;
+  }
+  @media (max-width:800px){
+    aside{width:100px;}
+    aside h1{display:none;}
+    nav a{font-size:0.8em;text-align:center;}
   }
 </style>
 </head>
 
 <body>
-
 <aside>
-  <h1>📘 Guía Interactiva</h1>
+  <h1>📘 Guía de Karina</h1>
   <nav>
-    <a href="#" class="active" data-target="cap1">Numeración</a>
-    <a href="#" data-target="cap2">Sumas y Restas</a>
-    <a href="#" data-target="cap3">Comparaciones</a>
-    <a href="#" data-target="cap4">Figuras</a>
-    <a href="#" data-target="cap5">Final</a>
+    <a href="#" class="active" data-target="cap1">1️⃣ Numeración</a>
+    <a href="#" data-target="cap2">2️⃣ Sumas y Restas</a>
+    <a href="#" data-target="cap3">3️⃣ Comparaciones</a>
+    <a href="#" data-target="cap4">4️⃣ Figuras</a>
+    <a href="#" data-target="cap5">5️⃣ Longitudes</a>
+    <a href="#" data-target="cap6">6️⃣ Ordinales</a>
+    <a href="#" data-target="cap7">7️⃣ Pictogramas</a>
+    <a href="#" data-target="cap8">🏁 Final</a>
   </nav>
+  <div class="progress-bar"><div class="progress" id="progress"></div></div>
 </aside>
 
 <main>
   <section id="cap1" class="active">
     <h2>Capítulo 1: Numeración del 0 al 100</h2>
-    <p>Completa los números que faltan:</p>
-    <div>
-      10, 20, <input id="n1" size="3">, 40, <input id="n2" size="3">, 60
-    </div>
-    <button onclick="checkNumeros()">Revisar</button>
+    <p>Completa los números que faltan en las secuencias:</p>
+    <div>10, 20, <input id="n1" size="3">, 40, <input id="n2" size="3">, 60</div>
+    <div>Antes de 36: <input id="n3" size="3"> | Después de 36: <input id="n4" size="3"></div>
+    <button onclick="checkNumeracion()">Revisar</button>
     <div id="f1" class="feedback"></div>
   </section>
 
   <section id="cap2">
     <h2>Capítulo 2: Sumas y Restas</h2>
     <p>Resuelve las operaciones:</p>
-    <div>3 + 2 = <input id="s1" size="3"></div>
-    <div>9 - 4 = <input id="s2" size="3"></div>
-    <div>6 + 3 = <input id="s3" size="3"></div>
+    <div>4 + 3 = <input id="s1" size="3"></div>
+    <div>9 - 2 = <input id="s2" size="3"></div>
+    <div>7 + 1 = <input id="s3" size="3"></div>
+    <div>10 - 5 = <input id="s4" size="3"></div>
     <button onclick="checkSumas()">Revisar</button>
     <div id="f2" class="feedback"></div>
   </section>
@@ -125,109 +146,146 @@
   <section id="cap3">
     <h2>Capítulo 3: Comparaciones</h2>
     <p>Selecciona el número mayor:</p>
-    <select id="cmp">
-      <option value="">--Elige--</option>
-      <option value="A">45</option>
-      <option value="B">52</option>
-      <option value="C">31</option>
-    </select>
+    <select id="cmp1"><option value="">--elige--</option><option>21</option><option>45</option><option>33</option></select>
     <button onclick="checkComp()">Revisar</button>
     <div id="f3" class="feedback"></div>
   </section>
 
   <section id="cap4">
-    <h2>Capítulo 4: Figuras</h2>
-    <p>Identifica la figura correcta según la descripción:</p>
-    <div>
-      <strong>“Tiene 3 lados iguales”</strong><br>
-      <input type="radio" name="fig" value="cuadrado"> Cuadrado<br>
-      <input type="radio" name="fig" value="triangulo"> Triángulo<br>
-      <input type="radio" name="fig" value="circulo"> Círculo
+    <h2>Capítulo 4: Figuras 2D y 3D</h2>
+    <p>Identifica la figura correcta:</p>
+    <div>“Tiene tres lados iguales” → 
+      <select id="fig1">
+        <option value="">--elige--</option>
+        <option>Cuadrado</option><option>Triángulo</option><option>Círculo</option>
+      </select>
     </div>
     <button onclick="checkFig()">Revisar</button>
     <div id="f4" class="feedback"></div>
   </section>
 
   <section id="cap5">
-    <h2>Actividad Final</h2>
-    <p>¡Excelente! Has completado todos los ejercicios 🎉</p>
-    <p>Recuerda seguir practicando cada día.</p>
+    <h2>Capítulo 5: Longitudes</h2>
+    <p>Marca el más alto:</p>
+    <select id="lon1">
+      <option value="">--elige--</option><option>Niña (1,10 m)</option><option>Niño (1,30 m)</option>
+    </select>
+    <button onclick="checkLon()">Revisar</button>
+    <div id="f5" class="feedback"></div>
   </section>
 
-  <div class="footer">© 2025 FEPASA | Guía Matemática Infantil – Linhart</div>
+  <section id="cap6">
+    <h2>Capítulo 6: Números Ordinales</h2>
+    <p>¿Quién va en tercer lugar?</p>
+    <select id="ord1">
+      <option value="">--elige--</option><option>Perro</option><option>Gato</option><option>Conejo</option>
+    </select>
+    <button onclick="checkOrd()">Revisar</button>
+    <div id="f6" class="feedback"></div>
+  </section>
+
+  <section id="cap7">
+    <h2>Capítulo 7: Pictogramas</h2>
+    <p>Observa la tabla y responde:</p>
+    <table border="1" cellpadding="6">
+      <tr><th>Fruta</th><th>Cantidad</th></tr>
+      <tr><td>Manzanas</td><td>🍎🍎🍎</td></tr>
+      <tr><td>Plátanos</td><td>🍌🍌</td></tr>
+      <tr><td>Uvas</td><td>🍇🍇🍇🍇</td></tr>
+    </table>
+    <p>¿Qué fruta hay más?</p>
+    <select id="pic1">
+      <option value="">--elige--</option><option>Manzanas</option><option>Plátanos</option><option>Uvas</option>
+    </select>
+    <button onclick="checkPic()">Revisar</button>
+    <div id="f7" class="feedback"></div>
+  </section>
+
+  <section id="cap8">
+    <h2>🎉 ¡Excelente!</h2>
+    <p>Has completado toda la guía interactiva de Karina 💙</p>
+    <p>Gracias por aprender con dedicación y alegría.</p>
+  </section>
+
+  <div class="footer">Hecho con cariño por Karina 💙</div>
 </main>
 
 <script>
-  // navegación entre capítulos
-  const links = document.querySelectorAll('nav a');
-  const caps = document.querySelectorAll('section');
+let progreso = JSON.parse(localStorage.getItem("progresoKarina")) || {cap1:false,cap2:false,cap3:false,cap4:false,cap5:false,cap6:false,cap7:false};
+const links = document.querySelectorAll("nav a");
+const caps = document.querySelectorAll("section");
+const progressBar = document.getElementById("progress");
 
-  links.forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      links.forEach(l => l.classList.remove('active'));
-      caps.forEach(c => c.classList.remove('active'));
-      link.classList.add('active');
-      document.getElementById(link.dataset.target).classList.add('active');
-    });
+function updateProgress(){
+  const done = Object.values(progreso).filter(v=>v).length;
+  const pct = Math.round(done / 7 * 100);
+  progressBar.style.width = pct + "%";
+  if(done===7){document.getElementById("cap8").classList.add("active");}
+  localStorage.setItem("progresoKarina", JSON.stringify(progreso));
+}
+
+links.forEach(l=>{
+  l.addEventListener("click",e=>{
+    e.preventDefault();
+    const target=l.dataset.target;
+    const idx=[...links].indexOf(l);
+    if(idx>0 && !Object.values(progreso).slice(0,idx).every(v=>v)) return; // lock
+    links.forEach(a=>a.classList.remove("active"));
+    caps.forEach(c=>c.classList.remove("active"));
+    l.classList.add("active");
+    document.getElementById(target).classList.add("active");
   });
+});
+updateProgress();
 
-  // funciones interactivas
-  function checkNumeros() {
-    const n1 = document.getElementById("n1").value;
-    const n2 = document.getElementById("n2").value;
-    const f = document.getElementById("f1");
-    if (n1 == "30" && n2 == "50") {
-      f.innerHTML = "✅ ¡Muy bien! Has completado la secuencia.";
-      f.className = "feedback ok";
-    } else {
-      f.innerHTML = "❌ Revisa los números faltantes.";
-      f.className = "feedback bad";
-    }
-  }
-
-  function checkSumas() {
-    const a = document.getElementById("s1").value == "5";
-    const b = document.getElementById("s2").value == "5";
-    const c = document.getElementById("s3").value == "9";
-    const f = document.getElementById("f2");
-    if (a && b && c) {
-      f.innerHTML = "✅ ¡Excelente trabajo!";
-      f.className = "feedback ok";
-    } else {
-      f.innerHTML = "❌ Revisa tus cálculos.";
-      f.className = "feedback bad";
-    }
-  }
-
-  function checkComp() {
-    const sel = document.getElementById("cmp").value;
-    const f = document.getElementById("f3");
-    if (sel === "B") {
-      f.innerHTML = "✅ Correcto, 52 es el número mayor.";
-      f.className = "feedback ok";
-    } else {
-      f.innerHTML = "❌ Inténtalo de nuevo.";
-      f.className = "feedback bad";
-    }
-  }
-
-  function checkFig() {
-    const sel = document.querySelector('input[name="fig"]:checked');
-    const f = document.getElementById("f4");
-    if (!sel) {
-      f.innerHTML = "Selecciona una opción.";
-      return;
-    }
-    if (sel.value === "triangulo") {
-      f.innerHTML = "✅ Muy bien, el triángulo tiene 3 lados iguales.";
-      f.className = "feedback ok";
-    } else {
-      f.innerHTML = "❌ No es correcto, inténtalo otra vez.";
-      f.className = "feedback bad";
-    }
-  }
+// funciones de revisión
+function checkNumeracion(){
+  const ok=(n1.value=="30" && n2.value=="50" && n3.value=="35" && n4.value=="37");
+  showFeedback("f1",ok);
+  if(ok)progreso.cap1=true;
+  updateProgress();
+}
+function checkSumas(){
+  const ok=(s1.value=="7" && s2.value=="7" && s3.value=="8" && s4.value=="5");
+  showFeedback("f2",ok);
+  if(ok)progreso.cap2=true;
+  updateProgress();
+}
+function checkComp(){
+  const ok=(cmp1.value=="45");
+  showFeedback("f3",ok);
+  if(ok)progreso.cap3=true;
+  updateProgress();
+}
+function checkFig(){
+  const ok=(fig1.value=="Triángulo");
+  showFeedback("f4",ok);
+  if(ok)progreso.cap4=true;
+  updateProgress();
+}
+function checkLon(){
+  const ok=(lon1.value=="Niño (1,30 m)");
+  showFeedback("f5",ok);
+  if(ok)progreso.cap5=true;
+  updateProgress();
+}
+function checkOrd(){
+  const ok=(ord1.value=="Conejo");
+  showFeedback("f6",ok);
+  if(ok)progreso.cap6=true;
+  updateProgress();
+}
+function checkPic(){
+  const ok=(pic1.value=="Uvas");
+  showFeedback("f7",ok);
+  if(ok)progreso.cap7=true;
+  updateProgress();
+}
+function showFeedback(id,ok){
+  const f=document.getElementById(id);
+  if(ok){f.textContent="✅ ¡Excelente!";f.className="feedback ok";}
+  else{f.textContent="❌ Revisa tu respuesta.";f.className="feedback bad";}
+}
 </script>
-
 </body>
 </html>
