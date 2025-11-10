@@ -3,102 +3,87 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Guía de Matemática Infantil – FEPASA</title>
+<title>Matemática Infantil Interactiva – FEPASA</title>
 
 <style>
   body {
     margin: 0;
-    font-family: "Poppins", sans-serif;
+    font-family: 'Poppins', sans-serif;
     background: linear-gradient(180deg, #e6f4ff 0%, #ffffff 100%);
-    color: #222;
     display: flex;
-    flex-direction: row;
-    min-height: 100vh;
+    color: #222;
   }
-
-  /* Menú lateral */
   aside {
-    width: 220px;
-    background: #005bb5;
+    width: 240px;
+    background: #004c99;
     color: white;
     padding: 20px;
-    box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
   }
-
   aside h1 {
     font-size: 1.2em;
-    margin-bottom: 20px;
     text-align: center;
+    margin-bottom: 15px;
   }
-
   nav a {
     display: block;
-    color: white;
-    text-decoration: none;
     padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 5px;
+    margin: 5px 0;
+    background: #0066cc;
+    border-radius: 10px;
+    text-decoration: none;
+    color: white;
     transition: 0.3s;
   }
-
   nav a:hover, nav a.active {
     background: #338af0;
   }
-
-  /* Contenido principal */
   main {
     flex: 1;
     padding: 30px;
     overflow-y: auto;
   }
-
-  .capitulo {
+  section {
     display: none;
     background: white;
-    border-radius: 20px;
+    border-radius: 15px;
     padding: 25px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    animation: fade 0.3s ease-in-out;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    animation: fade 0.4s ease;
   }
-
-  @keyframes fade {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .capitulo.active {
+  section.active {
     display: block;
   }
-
-  h2 {
-    color: #005bb5;
+  @keyframes fade { from {opacity: 0;} to {opacity: 1;} }
+  h2 { color: #004c99; }
+  input {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin: 3px;
   }
-
-  ol, ul {
-    line-height: 1.7;
-    margin-left: 20px;
+  button {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: 0.3s;
   }
-
+  button:hover { background: #005bb5; }
+  .feedback {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  .ok { color: green; }
+  .bad { color: red; }
   .footer {
     text-align: center;
-    margin-top: 40px;
-    font-size: 0.85em;
-    color: #666;
-  }
-
-  /* Responsive */
-  @media (max-width: 800px) {
-    aside {
-      width: 100%;
-      text-align: center;
-    }
-    nav a {
-      display: inline-block;
-      margin: 4px;
-    }
-    main {
-      padding: 15px;
-    }
+    font-size: 0.8em;
+    color: #555;
+    margin-top: 30px;
   }
 </style>
 </head>
@@ -106,110 +91,63 @@
 <body>
 
 <aside>
-  <h1>📘 Guía Infantil</h1>
-  <nav id="menu">
-    <a href="#" class="active" data-target="cap1">1️⃣ Numeración</a>
-    <a href="#" data-target="cap2">2️⃣ Figuras</a>
-    <a href="#" data-target="cap3">3️⃣ Longitudes</a>
-    <a href="#" data-target="cap4">4️⃣ Operaciones</a>
-    <a href="#" data-target="cap5">5️⃣ Sumas y Restas</a>
-    <a href="#" data-target="cap6">6️⃣ Ordinales</a>
-    <a href="#" data-target="cap7">7️⃣ Pictogramas</a>
+  <h1>📘 Guía Interactiva</h1>
+  <nav>
+    <a href="#" class="active" data-target="cap1">Numeración</a>
+    <a href="#" data-target="cap2">Sumas y Restas</a>
+    <a href="#" data-target="cap3">Comparaciones</a>
+    <a href="#" data-target="cap4">Figuras</a>
+    <a href="#" data-target="cap5">Final</a>
   </nav>
 </aside>
 
 <main>
-  <div id="cap1" class="capitulo active">
+  <section id="cap1" class="active">
     <h2>Capítulo 1: Numeración del 0 al 100</h2>
-    <p><strong>Objetivo:</strong> Reconocer, leer y escribir números hasta el 100.</p>
-    <ol>
-      <li>Escribe los números del 0 al 20.</li>
-      <li>Completa: 12, 13, ___, 15, ___, 17.</li>
-      <li>Cuenta de 10 en 10: 10, 20, ___, ___, 60, ___, 100.</li>
-      <li>Rodea el número más grande: 24 - 31 - 19 - 40.</li>
-    </ol>
-  </div>
+    <p>Completa los números que faltan:</p>
+    <div>
+      10, 20, <input id="n1" size="3">, 40, <input id="n2" size="3">, 60
+    </div>
+    <button onclick="checkNumeros()">Revisar</button>
+    <div id="f1" class="feedback"></div>
+  </section>
 
-  <div id="cap2" class="capitulo">
-    <h2>Capítulo 2: Figuras 2D y 3D</h2>
-    <p><strong>Objetivo:</strong> Reconocer formas planas y con volumen.</p>
-    <ul>
-      <li>Dibuja un círculo, cuadrado y triángulo.</li>
-      <li>Dibuja un cubo, esfera y cilindro.</li>
-      <li>Pelota → Esfera / Caja → Cubo / Reloj → Círculo</li>
-    </ul>
-  </div>
+  <section id="cap2">
+    <h2>Capítulo 2: Sumas y Restas</h2>
+    <p>Resuelve las operaciones:</p>
+    <div>3 + 2 = <input id="s1" size="3"></div>
+    <div>9 - 4 = <input id="s2" size="3"></div>
+    <div>6 + 3 = <input id="s3" size="3"></div>
+    <button onclick="checkSumas()">Revisar</button>
+    <div id="f2" class="feedback"></div>
+  </section>
 
-  <div id="cap3" class="capitulo">
-    <h2>Capítulo 3: Longitudes</h2>
-    <ul>
-      <li>Dibuja dos lápices: uno largo y otro corto.</li>
-      <li>Marca con ✔ cuál es más alto: Niño (1,30 m) / Niña (1,10 m).</li>
-      <li>Colorea de azul el objeto más corto y de rojo el más largo.</li>
-    </ul>
-  </div>
+  <section id="cap3">
+    <h2>Capítulo 3: Comparaciones</h2>
+    <p>Selecciona el número mayor:</p>
+    <select id="cmp">
+      <option value="">--Elige--</option>
+      <option value="A">45</option>
+      <option value="B">52</option>
+      <option value="C">31</option>
+    </select>
+    <button onclick="checkComp()">Revisar</button>
+    <div id="f3" class="feedback"></div>
+  </section>
 
-  <div id="cap4" class="capitulo">
-    <h2>Capítulo 4: Familia de Operaciones</h2>
-    <p><strong>Objetivo:</strong> Comprender la relación entre suma y resta.</p>
-    <pre>
-3 + 2 = 5
-5 - 2 = 3
-5 - 3 = 2
-    </pre>
-  </div>
+  <section id="cap4">
+    <h2>Capítulo 4: Figuras</h2>
+    <p>Identifica la figura correcta según la descripción:</p>
+    <div>
+      <strong>“Tiene 3 lados iguales”</strong><br>
+      <input type="radio" name="fig" value="cuadrado"> Cuadrado<br>
+      <input type="radio" name="fig" value="triangulo"> Triángulo<br>
+      <input type="radio" name="fig" value="circulo"> Círculo
+    </div>
+    <button onclick="checkFig()">Revisar</button>
+    <div id="f4" class="feedback"></div>
+  </section>
 
-  <div id="cap5" class="capitulo">
-    <h2>Capítulo 5: Sumas y Restas</h2>
-    <pre>
-3 + 2 = ___
-5 + 4 = ___
-9 - 3 = ___
-8 - 2 = ___
-6 + 1 = ___
-    </pre>
-  </div>
-
-  <div id="cap6" class="capitulo">
-    <h2>Capítulo 6: Números Ordinales</h2>
-    <ol>
-      <li>1° perro</li>
-      <li>2° gato</li>
-      <li>3° conejo</li>
-    </ol>
-    <p>¿Quién va primero? ______ / ¿Quién va tercero? ______</p>
-  </div>
-
-  <div id="cap7" class="capitulo">
-    <h2>Capítulo 7: Tablas y Pictogramas</h2>
-    <table border="1" cellpadding="6">
-      <tr><th>Fruta</th><th>Cantidad</th></tr>
-      <tr><td>Manzanas</td><td>🍎🍎🍎</td></tr>
-      <tr><td>Plátanos</td><td>🍌🍌</td></tr>
-      <tr><td>Uvas</td><td>🍇🍇🍇🍇</td></tr>
-    </table>
-  </div>
-
-  <div class="footer">
-    Hecho con cariño para aprender jugando 💫<br>
-    © FEPASA Dashboard | Linhart 2025
-  </div>
-</main>
-
-<script>
-  const links = document.querySelectorAll('nav a');
-  const caps = document.querySelectorAll('.capitulo');
-
-  links.forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      links.forEach(l => l.classList.remove('active'));
-      caps.forEach(c => c.classList.remove('active'));
-      link.classList.add('active');
-      document.getElementById(link.dataset.target).classList.add('active');
-    });
-  });
-</script>
-
-</body>
-</html>
+  <section id="cap5">
+    <h2>Actividad Final</h2>
+    <p>¡Excelente! Has completado todos los ejercicios 🎉
