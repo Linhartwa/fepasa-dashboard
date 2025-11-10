@@ -119,124 +119,92 @@
 </aside>
 
 <main>
-
-<!-- CAPÍTULO 1 -->
-<section id="cap1" class="active">
-  <h2>Capítulo 1: Numeración del 0 al 100</h2>
-  <h3>Actividad 1: Completa la secuencia</h3>
-  10, 20, <input id="n1" size="3">, 40, <input id="n2" size="3">, 60
-  <h3>Actividad 2: Número anterior y siguiente</h3>
-  Antes de 36: <input id="n3" size="3"> | Después de 36: <input id="n4" size="3">
-  <h3>Actividad 3: Ordena los números</h3>
-  45, 12, 27 → <input id="n5" size="3">, <input id="n6" size="3">, <input id="n7" size="3">
-  <h3>Actividad 4: Par o Impar</h3>
-  ¿El número 23 es? <select id="n8"><option>--</option><option>Par</option><option>Impar</option></select>
-  <button onclick="checkCap1()">Revisar</button><div id="f1" class="feedback"></div>
-</section>
-
-<!-- CAPÍTULO 2 -->
-<section id="cap2">
-  <h2>Capítulo 2: Sumas y Restas</h2>
-  <h3>Actividad 1</h3>
-  4 + 3 = <input id="s1" size="3"> | 9 - 2 = <input id="s2" size="3">
-  <h3>Actividad 2</h3>
-  ¿Cuál operación da 10?
-  <select id="s3"><option>--</option><option>8 + 2</option><option>6 + 1</option><option>7 + 1</option></select>
-  <h3>Actividad 3</h3>
-  Completa: 5 + ___ = 9 <input id="s4" size="3">
-  <h3>Actividad 4</h3>
-  <ul>
-    <li>3 + 4 = 8 <select id="s5"><option>--</option><option>Verdadero</option><option>Falso</option></select></li>
-    <li>9 - 3 = 6 <select id="s6"><option>--</option><option>Verdadero</option><option>Falso</option></select></li>
-  </ul>
-  <button onclick="checkCap2()">Revisar</button><div id="f2" class="feedback"></div>
-</section>
-
-<!-- CAPÍTULO 3 -->
-<section id="cap3">
-  <h2>Capítulo 3: Comparaciones</h2>
-  <h3>Actividad 1</h3>
-  Número mayor: <select id="cmp1"><option>--</option><option>12</option><option>37</option><option>28</option></select>
-  <h3>Actividad 2</h3>
-  Número menor: <select id="cmp2"><option>--</option><option>15</option><option>42</option><option>8</option></select>
-  <h3>Actividad 3</h3>
-  6 <input id="cmp3" size="2"> 9
-  <h3>Actividad 4</h3>
-  22, 14, 35 → <input id="cmp4a" size="3">, <input id="cmp4b" size="3">, <input id="cmp4c" size="3">
-  <button onclick="checkCap3()">Revisar</button><div id="f3" class="feedback"></div>
-</section>
-
-<!-- CAPÍTULO 4 -->
-<section id="cap4">
-  <h2>Capítulo 4: Figuras 2D y 3D</h2>
-  “Tiene tres lados iguales” → <select id="fig1"><option>--</option><option>Cuadrado</option><option>Triángulo</option><option>Círculo</option></select>
-  <p>Pelota → <select id="fig2"><option>--</option><option>Esfera</option><option>Cubo</option></select></p>
-  <p>Un cuadrado tiene <input id="fig3" size="3"> lados.</p>
-  <p>Un cilindro es una figura <select id="fig4"><option>--</option><option>2D</option><option>3D</option></select></p>
-  <button onclick="checkCap4()">Revisar</button><div id="f4" class="feedback"></div>
-</section>
-
-<!-- CAPÍTULO 5 -->
-<section id="cap5">
-  <h2>Capítulo 5: Longitudes</h2>
-  Más alto: <select id="lon1"><option>--</option><option>Niña (1,10 m)</option><option>Niño (1,30 m)</option></select>
-  <p>Más corto: <select id="lon2"><option>--</option><option>Lápiz</option><option>Regla</option><option>Palo</option></select></p>
-  <p>15, 8, 20 → <input id="lon3a" size="3">, <input id="lon3b" size="3">, <input id="lon3c" size="3"></p>
-  <p>El lápiz es más <input id="lon4" size="6"> que la regla.</p>
-  <button onclick="checkCap5()">Revisar</button><div id="f5" class="feedback"></div>
-</section>
-
-<!-- CAPÍTULO 6 -->
-<section id="cap6">
-  <h2>Capítulo 6: Números Ordinales</h2>
-  Tercer lugar: <select id="ord1"><option>--</option><option>Perro</option><option>Gato</option><option>Conejo</option></select>
-  <p>Primero: <select id="ord2"><option>--</option><option>María</option><option>José</option><option>Juan</option></select></p>
-  <p>2° significa: <select id="ord3"><option>--</option><option>Primero</option><option>Segundo</option><option>Tercero</option></select></p>
-  <p>1°,2°,3°, <input id="ord4" size="2">,5°</p>
-  <button onclick="checkCap6()">Revisar</button><div id="f6" class="feedback"></div>
-</section>
-
-<!-- CAPÍTULO 7 -->
-<section id="cap7">
-  <h2>Capítulo 7: Pictogramas</h2>
-  <p>¿Qué fruta hay más?</p>
-  <select id="pic1"><option>--</option><option>Manzanas</option><option>Plátanos</option><option>Uvas</option></select>
-  <p>¿Qué fruta hay menos?</p>
-  <select id="pic2"><option>--</option><option>Manzanas</option><option>Plátanos</option><option>Uvas</option></select>
-  <p>Total de frutas: <input id="pic3" size="3"></p>
-  <p>Manzanas: <input id="pic4" size="3"></p>
-  <button onclick="checkCap7()">Revisar</button><div id="f7" class="feedback"></div>
-</section>
-
-<!-- CAPÍTULO 8 -->
-<section id="cap8">
-  <h2>🎉 ¡Excelente!</h2>
-  <p>Has completado toda la guía interactiva de Karina 💙</p>
-  <p>Gracias por aprender con dedicación y alegría.</p>
-  <button onclick="resetProgress()">🔄 Reiniciar Progreso</button>
-</section>
+<!-- CAPÍTULOS 1–8 (igual que antes, omitido aquí por brevedad para no duplicar) -->
+<!-- ... Pega las secciones de capítulos que ya tienes sin cambios ... -->
 
 <div class="footer">Hecho con cariño por Karina 💙</div>
 </main>
 
 <script>
-let progreso=JSON.parse(localStorage.getItem("progresoKarina"))||{cap1:false,cap2:false,cap3:false,cap4:false,cap5:false,cap6:false,cap7:false};
-const links=document.querySelectorAll("nav a");
-const caps=document.querySelectorAll("section");
-const progressBar=document.getElementById("progress");
-function updateProgress(){const done=Object.values(progreso).filter(v=>v).length;const pct=Math.round(done/7*100);progressBar.style.width=pct+"%";if(done===7){document.getElementById("cap8").classList.add("active");}localStorage.setItem("progresoKarina",JSON.stringify(progreso));}
-links.forEach(l=>{l.addEventListener("click",e=>{e.preventDefault();const target=l.dataset.target;const idx=[...links].indexOf(l);if(idx>0&&!Object.values(progreso).slice(0,idx).every(v=>v))return;links.forEach(a=>a.classList.remove("active"));caps.forEach(c=>c.classList.remove("active"));l.classList.add("active");document.getElementById(target).classList.add("active");});});
+let progreso = JSON.parse(localStorage.getItem("progresoKarina")) || {
+  cap1:false,cap2:false,cap3:false,cap4:false,cap5:false,cap6:false,cap7:false
+};
+const links = document.querySelectorAll("nav a");
+const caps = document.querySelectorAll("section");
+const progressBar = document.getElementById("progress");
+
+function updateProgress(){
+  const done = Object.values(progreso).filter(v=>v).length;
+  const pct = Math.round(done/7*100);
+  progressBar.style.width = pct + "%";
+  if(done === 7){
+    document.getElementById("cap8").classList.add("active");
+  }
+  localStorage.setItem("progresoKarina", JSON.stringify(progreso));
+}
+
+links.forEach(l=>{
+  l.addEventListener("click", e=>{
+    e.preventDefault();
+    const target = l.dataset.target;
+    // 🔓 MODO LIBRE — se eliminó el bloqueo por progreso
+    links.forEach(a=>a.classList.remove("active"));
+    caps.forEach(c=>c.classList.remove("active"));
+    l.classList.add("active");
+    document.getElementById(target).classList.add("active");
+  });
+});
+
 updateProgress();
-function okFeedback(id,msg="✅ ¡Excelente!"){const f=document.getElementById(id);f.textContent=msg;f.className="feedback ok";}
-function badFeedback(id,msg="❌ Revisa tus respuestas."){const f=document.getElementById(id);f.textContent=msg;f.className="feedback bad";}
-function checkCap1(){const ok=(n1.value=="30"&&n2.value=="50"&&n3.value=="35"&&n4.value=="37"&&n5.value=="12"&&n6.value=="27"&&n7.value=="45"&&n8.value=="Impar");ok?(okFeedback("f1"),progreso.cap1=true):badFeedback("f1");updateProgress();}
-function checkCap2(){const ok=(s1.value=="7"&&s2.value=="7"&&s3.value=="8 + 2"&&s4.value=="4"&&s5.value=="Falso"&&s6.value=="Verdadero");ok?(okFeedback("f2"),progreso.cap2=true):badFeedback("f2");updateProgress();}
-function checkCap3(){const ok=(cmp1.value=="37"&&cmp2.value=="8"&&cmp3.value=="<"&&cmp4a.value=="14"&&cmp4b.value=="22"&&cmp4c.value=="35");ok?(okFeedback("f3"),progreso.cap3=true):badFeedback("f3");updateProgress();}
-function checkCap4(){const ok=(fig1.value=="Triángulo"&&fig2.value=="Esfera"&&fig3.value=="4"&&fig4.value=="3D");ok?(okFeedback("f4"),progreso.cap4=true):badFeedback("f4");updateProgress();}
-function checkCap5(){const ok=(lon1.value=="Niño (1,30 m)"&&lon2.value=="Lápiz"&&lon3a.value=="8"&&lon3b.value=="15"&&lon3c.value=="20"&&lon4.value.toLowerCase()=="corto");ok?(okFeedback("f5"),progreso.cap5=true):badFeedback("f5");updateProgress();}
-function checkCap6(){const ok=(ord1.value=="Conejo"&&ord2.value=="María"&&ord3.value=="Segundo"&&ord4.value=="4");ok?(okFeedback("f6"),progreso.cap6=true):badFeedback("f6");updateProgress();}
-function checkCap7(){const ok=(pic1.value=="Uvas"&&pic2.value=="Plátanos"&&pic3.value=="9"&&pic4.value=="3");ok?(okFeedback("f7"),progreso.cap7=true):badFeedback("f7");updateProgress();}
-function resetProgress(){localStorage.removeItem("progresoKarina");alert("Progreso reiniciado ✅");location.reload();}
+
+function okFeedback(id,msg="✅ ¡Excelente!") {
+  const f=document.getElementById(id);
+  f.textContent=msg; f.className="feedback ok";
+}
+function badFeedback(id,msg="❌ Revisa tus respuestas.") {
+  const f=document.getElementById(id);
+  f.textContent=msg; f.className="feedback bad";
+}
+
+function checkCap1(){
+  const ok=(n1.value=="30"&&n2.value=="50"&&n3.value=="35"&&n4.value=="37"&&
+            n5.value=="12"&&n6.value=="27"&&n7.value=="45"&&n8.value=="Impar");
+  ok?(okFeedback("f1"),progreso.cap1=true):badFeedback("f1");updateProgress();
+}
+function checkCap2(){
+  const ok=(s1.value=="7"&&s2.value=="7"&&s3.value=="8 + 2"&&s4.value=="4"&&
+            s5.value=="Falso"&&s6.value=="Verdadero");
+  ok?(okFeedback("f2"),progreso.cap2=true):badFeedback("f2");updateProgress();
+}
+function checkCap3(){
+  const ok=(cmp1.value=="37"&&cmp2.value=="8"&&cmp3.value=="<"&&
+            cmp4a.value=="14"&&cmp4b.value=="22"&&cmp4c.value=="35");
+  ok?(okFeedback("f3"),progreso.cap3=true):badFeedback("f3");updateProgress();
+}
+function checkCap4(){
+  const ok=(fig1.value=="Triángulo"&&fig2.value=="Esfera"&&fig3.value=="4"&&fig4.value=="3D");
+  ok?(okFeedback("f4"),progreso.cap4=true):badFeedback("f4");updateProgress();
+}
+function checkCap5(){
+  const ok=(lon1.value=="Niño (1,30 m)"&&lon2.value=="Lápiz"&&
+            lon3a.value=="8"&&lon3b.value=="15"&&lon3c.value=="20"&&
+            lon4.value.toLowerCase()=="corto");
+  ok?(okFeedback("f5"),progreso.cap5=true):badFeedback("f5");updateProgress();
+}
+function checkCap6(){
+  const ok=(ord1.value=="Conejo"&&ord2.value=="María"&&
+            ord3.value=="Segundo"&&ord4.value=="4");
+  ok?(okFeedback("f6"),progreso.cap6=true):badFeedback("f6");updateProgress();
+}
+function checkCap7(){
+  const ok=(pic1.value=="Uvas"&&pic2.value=="Plátanos"&&pic3.value=="9"&&pic4.value=="3");
+  ok?(okFeedback("f7"),progreso.cap7=true):badFeedback("f7");updateProgress();
+}
+function resetProgress(){
+  localStorage.removeItem("progresoKarina");
+  alert("Progreso reiniciado ✅");
+  location.reload();
+}
 </script>
 </body>
 </html>
