@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guía de Matemática Infantil</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      background-color: #fff;
+      color: #222;
+      margin: 30px auto;
+      max-width: 800px;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #0055aa;
+    }
+    hr {
+      border: 0;
+      border-top: 2px solid #0055aa;
+      margin: 30px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Guía de Matemática Infantil – Nivel 1</h1>
+  <p><strong>Edad recomendada:</strong> 6 años</p>
+
+  <hr>
+  <h2>Capítulo 1: Numeración del 0 al 100</h2>
+  <p><strong>Objetivo:</strong> Reconocer, leer y escribir números hasta el 100.</p>
+  <ol>
+    <li>Escribe los números del 0 al 20.</li>
+    <li>Completa: 12, 13, ___, 15, ___, 17</li>
+    <li>Cuenta de 10 en 10: 10, 20, ___, ___, ___, 60, ___, ___, 90, 100</li>
+    <li>Rodea el número más grande: 24 - 31 - 19 - 40</li>
+    <li>Antes de 36: ___ / Después de 36: ___</li>
+  </ol>
+
+  <hr>
+  <h2>Capítulo 2: Figuras 2D y 3D</h2>
+  <p><strong>Objetivo:</strong> Reconocer formas planas y con volumen.</p>
+  <ul>
+    <li>Dibuja un círculo, cuadrado y triángulo.</li>
+    <li>Dibuja un cubo, esfera y cilindro.</li>
+    <li>Pelota → Esfera / Caja → Cubo / Reloj → Círculo</li>
+  </ul>
+
+  <hr>
+  <h2>Capítulo 3: Longitudes</h2>
+  <ul>
+    <li>Dibuja dos lápices: uno largo y otro corto.</li>
+    <li>Marca con ✔ cuál es más alto: Niño (1,30 m) / Niña (1,10 m).</li>
+    <li>Colorea de azul el objeto más corto y de rojo el más largo.</li>
+  </ul>
+
+  <hr>
+  <h2>Capítulo 4: Familia de Operaciones</h2>
+  <p><strong>Objetivo:</strong> Comprender la relación entre suma y resta.</p>
+  <pre>
+3 + 2 = 5
+5 - 2 = 3
+5 - 3 = 2
+  </pre>
+  <p>Completa la familia:</p>
+  <ul>
+    <li>4 + 3 = ___</li>
+    <li>3 + 4 = ___</li>
+    <li>7 - 4 = ___</li>
+    <li>7 - 3 = ___</li>
+  </ul>
+
+  <hr>
+  <h2>Capítulo 5: Sumas y Restas</h2>
+  <pre>
+3 + 2 = ___
+5 + 4 = ___
+9 - 3 = ___
+8 - 2 = ___
+6 + 1 = ___
+  </pre>
+
+  <hr>
+  <h2>Capítulo 6: Números Ordinales</h2>
+  <ol>
+    <li>1° perro</li>
+    <li>2° gato</li>
+    <li>3° conejo</li>
+  </ol>
+  <p>¿Quién va primero? ______ / ¿Quién va tercero? ______</p>
+
+  <hr>
+  <h2>Capítulo 7: Tablas y Pictogramas</h2>
+  <table border="1" cellpadding="6">
+    <tr><th>Fruta</th><th>Cantidad</th></tr>
+    <tr><td>Manzanas</td><td>3</td></tr>
+    <tr><td>Plátanos</td><td>2</td></tr>
+    <tr><td>Uvas</td><td>4</td></tr>
+  </table>
+  <p>¿Qué fruta hay más? ______ / ¿Qué fruta hay menos? ______</p>
+
+</body>
+</html>
