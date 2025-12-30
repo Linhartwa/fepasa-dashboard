@@ -2,110 +2,43 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📊 Análisis de Carga - FEPASA</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f7f9fb;
-      color: #222;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      background-color: #003366;
-      color: white;
-      padding: 12px 24px;
-    }
-    header img {
-      height: 50px;
-      margin-right: 15px;
-    }
-    h1 {
-      font-size: 22px;
-      margin: 0;
-    }
-    .container {
-      padding: 24px;
-    }
-    .charts {
-      display: flex;
-      gap: 30px;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    .chart-box {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-      flex: 1 1 45%;
-      min-width: 400px;
-    }
-    canvas {
-      width: 100%;
-      height: 320px;
-    }
+    body { font-family: Segoe UI, Arial; background:#f7f9fb; margin:0 }
+    header { background:#003366; color:white; padding:12px 24px; display:flex; align-items:center }
+    header img { height:45px; margin-right:12px }
+    .container { padding:24px }
+
     table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 25px;
-      background-color: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+      box-shadow:0 3px 6px rgba(0,0,0,.1);
+      margin-top:20px
     }
-    th {
-      background-color: #003366;
-      color: white;
-      text-align: center;
-      padding: 8px;
-    }
-    td {
-      padding: 8px;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
-    }
-    tfoot td {
-      font-weight: bold;
-      background-color: #e8f0ff;
-    }
+    th { background:#003366; color:white; padding:8px }
+    td { padding:8px; text-align:center; border-bottom:1px solid #ddd }
+
+    .cumple { background:#d4edda; color:#155724; font-weight:bold }
+    .nocumple { background:#f8d7da; color:#721c24; font-weight:bold }
+
+    .charts { display:flex; gap:30px; flex-wrap:wrap }
+    canvas { height:320px }
   </style>
 </head>
 
 <body>
+
 <header>
-  <img src="https://www.fepasa.com/wp-content/uploads/2023/03/LOGO-FEPASA-VECTORIAL-1.png" alt="FEPASA Logo">
-  <h1 id="titulo">📊 Análisis de Carga</h1>
+  <img src="https://www.fepasa.com/wp-content/uploads/2023/03/LOGO-FEPASA-VECTORIAL-1.png">
+  <h2 id="titulo"></h2>
 </header>
 
 <div class="container">
 
-  <!-- 🔹 TABLA CUMPLIMIENTO INICIO -->
-  <table id="tablaInicio">
-    <thead>
-      <tr>
-        <th>Hora Diseño Inicio</th>
-        <th>Hora Real Inicio ST1</th>
-        <th>Cumplimiento</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <div class="charts">
-    <div class="chart-box">
-      <canvas id="tasaCargaChart"></canvas>
-    </div>
-    <div class="chart-box">
-      <canvas id="tiempoChart"></canvas>
-    </div>
-  </div>
-
-  <!-- 🔹 TABLA SUBTRENADAS -->
   <table id="tablaDatos">
+    <thead id="filaCumplimiento"></thead>
     <thead>
       <tr>
         <th>Subtrenada</th>
@@ -113,113 +46,98 @@
         <th>Postura</th>
         <th>Aviso</th>
         <th>Retiro</th>
-        <th>Carros Cargados</th>
-        <th>Tiempo Carga (hh:mm)</th>
-        <th>Av-Ret (min)</th>
-        <th>Ret-Post (min)</th>
-        <th>Tasa Carga</th>
-        <th>Eficiencia (%)</th>
+        <th>Carros</th>
+        <th>Tiempo Carga</th>
+        <th>Av-Ret</th>
+        <th>Ret-Post</th>
+        <th>Tasa</th>
+        <th>Eficiencia</th>
       </tr>
     </thead>
     <tbody></tbody>
-    <tfoot id="resumen"></tfoot>
   </table>
+
+  <div class="charts">
+    <canvas id="tasaChart"></canvas>
+    <canvas id="tiempoChart"></canvas>
+  </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const params = new URLSearchParams(window.location.search);
+const p = new URLSearchParams(window.location.search);
 
-  const parseNumList = (str) =>
-    (str || "").replace(/%20/g, " ").split(",").map(s => Number(s.trim())).filter(n => !isNaN(n));
+// === PARAMETROS BASE ===
+const tren = p.get("tren") || "";
+const folio = p.get("folio") || "";
+const horaDiseno = p.get("horaDisenoInicio");
+const horaReal = p.get("horaRealInicio");
 
-  const parseTextList = (str) =>
-    (str || "").replace(/%20/g, " ").split(",").map(s => s.trim());
+// === LISTAS ===
+const list = (k) => (p.get(k)||"").split(",").map(v=>v.trim());
+const num  = (k) => list(k).map(v=>Number(v)||0);
 
-  const tren = params.get("tren") || "";
-  const folio = params.get("folio") || "";
+const subtrenadas = list("subtrenadas");
+const lineas = list("linea");
+const postura = list("postura");
+const aviso = list("aviso");
+const retiro = list("retiro");
+const cargados = num("cargados");
+const avRet = num("avisoRetiro");
+const avPost = num("avisoPostura");
+const tasa = num("tasaCarga");
+const eficiencia = num("eficiencia");
 
-  const subtrenadas = parseTextList(params.get("subtrenadas"));
-  const lineas = parseTextList(params.get("linea"));
-  const postura = parseTextList(params.get("postura"));
-  const aviso = parseTextList(params.get("aviso"));
-  const retiro = parseTextList(params.get("retiro"));
-  const cargados = parseNumList(params.get("cargados"));
-  const avisoRetiro = parseNumList(params.get("avisoRetiro"));
-  const avisoPostura = parseNumList(params.get("avisoPostura"));
-  const tasaCarga = parseNumList(params.get("tasaCarga"));
-  const eficiencia = parseNumList(params.get("eficiencia"));
+// === TITULO ===
+document.getElementById("titulo").innerText =
+  `📊 Análisis de Carga – Tren ${tren} (${folio})`;
 
-  const horaDisenoInicio = params.get("horaDisenoInicio");
-  const horaRealInicioST1 = params.get("horaRealInicioST1");
-  const cumpleInicio = params.get("cumpleInicio");
+// === CUMPLIMIENTO ===
+const cumple = horaReal && horaDiseno && new Date(horaReal) <= new Date(horaDiseno);
 
-  document.getElementById("titulo").innerText =
-    `📊 Análisis de Carga - Tren ${tren} (${folio || "sin folio"})`;
+document.getElementById("filaCumplimiento").innerHTML = `
+<tr class="${cumple ? 'cumple' : 'nocumple'}">
+  <th colspan="3">Inicio Diseño</th>
+  <th colspan="3">${horaDiseno || "-"}</th>
+  <th colspan="3">Inicio Real</th>
+  <th colspan="2">${horaReal || "-"}</th>
+</tr>
+<tr class="${cumple ? 'cumple' : 'nocumple'}">
+  <th colspan="11">${cumple ? "✅ CUMPLE HORARIO DE DISEÑO" : "❌ NO CUMPLE HORARIO DE DISEÑO"}</th>
+</tr>`;
 
-  const formatDateTime = (dt) => {
-    if (!dt || dt === "null") return "-";
-    const d = new Date(dt);
-    return isNaN(d) ? dt : d.toLocaleString("es-CL", {
-      day: "2-digit", month: "2-digit", year: "numeric",
-      hour: "2-digit", minute: "2-digit"
-    });
-  };
+// === TABLA ===
+const tbody = document.querySelector("tbody");
+subtrenadas.forEach((_,i)=>{
+  const tr = document.createElement("tr");
+  [
+    subtrenadas[i], lineas[i], postura[i], aviso[i], retiro[i],
+    cargados[i], "-", avRet[i], avPost[i], tasa[i], eficiencia[i]
+  ].forEach(v=>{
+    const td=document.createElement("td");
+    td.textContent=v;
+    tr.appendChild(td);
+  });
+  tbody.appendChild(tr);
+});
 
-  // 🔹 Render tabla cumplimiento
-  const filaInicio = document.createElement("tr");
-  filaInicio.innerHTML = `
-    <td>${formatDateTime(horaDisenoInicio)}</td>
-    <td>${formatDateTime(horaRealInicioST1)}</td>
-    <td style="font-weight:bold; color:${cumpleInicio === "CUMPLE" ? "green" : "red"}">
-      ${cumpleInicio || "-"}
-    </td>
-  `;
-  document.querySelector("#tablaInicio tbody").appendChild(filaInicio);
+// === GRAFICOS ===
+new Chart(tasaChart,{
+  type:"bar",
+  data:{labels:subtrenadas,datasets:[{label:"Tasa Carga",data:tasa}]}
+});
 
-  // 🔹 Tabla subtrenadas
-  const tbody = document.querySelector("#tablaDatos tbody");
-  let totalCarros = 0, promTasa = 0, promEficiencia = 0;
-
-  for (let i = 0; i < subtrenadas.length; i++) {
-    const inicio = new Date(postura[i]);
-    const fin = new Date(aviso[i]);
-    const minutosCarga = fin > inicio ? (fin - inicio) / 60000 : 0;
-
-    const fila = document.createElement("tr");
-    [
-      subtrenadas[i], lineas[i],
-      formatDateTime(postura[i]), formatDateTime(aviso[i]), formatDateTime(retiro[i]),
-      cargados[i] || 0,
-      `${String(Math.floor(minutosCarga / 60)).padStart(2,"0")}:${String(Math.floor(minutosCarga % 60)).padStart(2,"0")}`,
-      Math.round(avisoRetiro[i] || 0),
-      Math.round(avisoPostura[i] || 0),
-      (tasaCarga[i] || 0).toFixed(2),
-      (eficiencia[i] || 0).toFixed(2)
-    ].forEach(v => {
-      const td = document.createElement("td");
-      td.textContent = v;
-      fila.appendChild(td);
-    });
-
-    totalCarros += cargados[i] || 0;
-    promTasa += tasaCarga[i] || 0;
-    promEficiencia += eficiencia[i] || 0;
-    tbody.appendChild(fila);
+new Chart(tiempoChart,{
+  type:"bar",
+  data:{
+    labels:subtrenadas,
+    datasets:[
+      {label:"Aviso-Retiro",data:avRet},
+      {label:"Retiro-Postura",data:avPost}
+    ]
   }
-
-  if (subtrenadas.length) {
-    document.getElementById("resumen").innerHTML = `
-      <tr>
-        <td colspan="5"><strong>Resumen Tren ${tren}</strong></td>
-        <td>${totalCarros}</td>
-        <td colspan="3"></td>
-        <td>${(promTasa / subtrenadas.length).toFixed(2)}</td>
-        <td>${(promEficiencia / subtrenadas.length).toFixed(2)}</td>
-      </tr>`;
-  }
+});
 </script>
+
 </body>
 </html>
-
