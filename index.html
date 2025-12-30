@@ -82,23 +82,19 @@
 
   <div class="container">
 
-    <!-- 🔹 TABLA NUEVA: INICIO DISEÑO VS REAL -->
-    <table id="tablaInicio">
-      <thead>
-        <tr>
-          <th>Hora Inicio Diseño</th>
-          <th>Hora Inicio Real</th>
-          <th>Resultado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td id="inicioDisenoTxt"></td>
-          <td id="inicioRealTxt"></td>
-          <td id="cumpleTxt"></td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- 🔹 BLOQUE NUEVO: CUMPLIMIENTO INICIO -->
+    <div id="bloqueItinerario" style="
+      background:white;
+      border-radius:12px;
+      padding:16px;
+      margin-bottom:24px;
+      box-shadow:0 3px 6px rgba(0,0,0,0.1);
+    ">
+      <h3 style="margin-top:0">⏱️ Cumplimiento de Inicio</h3>
+      <p><strong>Inicio Diseño:</strong> <span id="inicioDisenoTxt">-</span></p>
+      <p><strong>Inicio Real:</strong> <span id="inicioRealTxt">-</span></p>
+      <p><strong>Resultado:</strong> <span id="resultadoInicio">-</span></p>
+    </div>
 
     <div class="charts">
       <div class="chart-box">
@@ -162,11 +158,12 @@
     const tasaCarga = parseNumList(params.get("tasaCarga"));
     const eficiencia = parseNumList(params.get("eficiencia"));
 
-    /* 🔹 NUEVOS PARÁMETROS */
+    // 🔹 NUEVOS PARAMETROS (SIN TOCAR LO DEMÁS)
     const inicioDiseno = params.get("inicioDiseno");
     const inicioReal = params.get("inicioReal");
 
-    document.getElementById("titulo").innerText = `📊 Análisis de Carga - Tren ${tren} (${folio || "sin folio"})`;
+    document.getElementById("titulo").innerText =
+      `📊 Análisis de Carga - Tren ${tren} (${folio || "sin folio"})`;
 
     const formatDateTime = (dt) => {
       if (!dt || dt === "null" || dt === "") return "-";
@@ -181,25 +178,187 @@
       });
     };
 
-    /* 🔹 COMPARACIÓN DISEÑO VS REAL */
-    const cumpleHorario = (diseno, real) => {
-      if (!diseno || !real) return "-";
-      return new Date(real) <= new Date(diseno) ? "CUMPLE" : "NO CUMPLE";
+    const calcularTiempoCarga = (inicio, fin) => {
+      if (!inicio || !fin) return 0;
+      const start = new Date(inicio);
+      const end = new Date(fin);
+      const diffMs = end - start;
+      return diffMs > 0 ? diffMs / 60000 : 0;
     };
 
-    document.getElementById("inicioDisenoTxt").innerText = formatDateTime(inicioDiseno);
-    document.getElementById("inicioRealTxt").innerText = formatDateTime(inicioReal);
+    const formatTimeHHMM = (minutes) => {
+      const h = Math.floor(minutes / 60);
+      const m = Math.floor(minutes % 60);
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
 
-    const resultado = cumpleHorario(inicioDiseno, inicioReal);
-    const celdaResultado = document.getElementById("cumpleTxt");
-    celdaResultado.innerText = resultado;
-    celdaResultado.style.fontWeight = "bold";
-    celdaResultado.style.color = resultado === "CUMPLE" ? "green" : "red";
+    const tbody = document.querySelector("#tablaDatos tbody");
+    let totalCarros = 0, promTasa = 0, promEficiencia = 0;
 
-    /* ===== TODO TU CÓDIGO EXISTENTE SIGUE IGUAL DESDE AQUÍ ===== */
-    /* (no modificado, no tocado, no corregido) */
+    for (let i = 0; i < subtrenadas.length; i++) {
+      const minutosCarga = calcularTiempoCarga(postura[i], aviso[i]);
 
-    // ... gráficos y tablas (idéntico al original)
+      const fila = document.createElement("tr");
+      const datos = [
+        subtrenadas[i] || "",
+        lineas[i] || "",
+        formatDateTime(postura[i]),
+        formatDateTime(aviso[i]),
+        formatDateTime(retiro[i]),
+        cargados[i] || 0,
+        formatTimeHHMM(minutosCarga),
+        Math.round(avisoRetiro[i] || 0),
+        Math.round(avisoPostura[i] || 0),
+        (tasaCarga[i] || 0).toFixed(2),
+        (eficiencia[i] || 0).toFixed(2)
+      ];
+
+      totalCarros += cargados[i] || 0;
+      promTasa += tasaCarga[i] || 0;
+      promEficiencia += eficiencia[i] || 0;
+
+      datos.forEach(d => {
+        const td = document.createElement("td");
+        td.textContent = d;
+        fila.appendChild(td);
+      });
+      tbody.appendChild(fila);
+    }
+
+    const tfoot = document.getElementById("resumen");
+    if (subtrenadas.length > 0) {
+      const filaResumen = document.createElement("tr");
+      filaResumen.innerHTML = `
+        <td colspan="5"><strong>Resumen del Tren ${tren}</strong></td>
+        <td>${totalCarros.toFixed(0)}</td>
+        <td colspan="3"></td>
+        <td>${(promTasa / subtrenadas.length).toFixed(2)}</td>
+        <td>${(promEficiencia / subtrenadas.length).toFixed(2)}</td>
+      `;
+      tfoot.appendChild(filaResumen);
+    }
+
+    // === EVALUACIÓN INICIO DISEÑO VS REAL ===
+    document.getElementById("inicioDisenoTxt").textContent = formatDateTime(inicioDiseno);
+    document.getElementById("inicioRealTxt").textContent = formatDateTime(inicioReal);
+
+    if (inicioDiseno && inicioReal) {
+      const dDiseno = new Date(inicioDiseno);
+      const dReal = new Date(inicioReal);
+
+      if (!isNaN(dDiseno) && !isNaN(dReal)) {
+        const resultado = document.getElementById("resultadoInicio");
+        if (dReal <= dDiseno) {
+          resultado.textContent = "CUMPLE";
+          resultado.style.color = "green";
+          resultado.style.fontWeight = "bold";
+        } else {
+          resultado.textContent = "NO CUMPLE";
+          resultado.style.color = "red";
+          resultado.style.fontWeight = "bold";
+        }
+      }
+    }
+
+    const mostrarValores = {
+      id: 'mostrarValores',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        chart.data.datasets.forEach((dataset, i) => {
+          if (dataset.type === "line") return;
+          chart.getDatasetMeta(i).data.forEach((bar, index) => {
+            const value = dataset.data[index];
+            if (value && value > 0) {
+              ctx.fillStyle = '#000';
+              ctx.font = 'bold 12px Segoe UI';
+              ctx.textAlign = 'center';
+              ctx.fillText(
+                value % 1 === 0 ? value : value.toFixed(2),
+                bar.x,
+                bar.y - 5
+              );
+            }
+          });
+        });
+      }
+    };
+
+    new Chart(document.getElementById("tasaCargaChart"), {
+      type: "bar",
+      data: {
+        labels: subtrenadas,
+        datasets: [
+          {
+            label: "Tasa Carga L2",
+            data: lineas.map((l, i) => (l === "L2" || l === "2") ? tasaCarga[i] : 0),
+            backgroundColor: "rgba(0, 99, 255, 0.7)"
+          },
+          {
+            label: "Tasa Carga L3",
+            data: lineas.map((l, i) => (l === "L3" || l === "3") ? tasaCarga[i] : 0),
+            backgroundColor: "rgba(255, 206, 86, 0.8)"
+          },
+          {
+            label: "Diseño L2 (5.45)",
+            data: subtrenadas.map(() => 5.45),
+            borderColor: "blue",
+            borderWidth: 2,
+            type: "line",
+            fill: false
+          },
+          {
+            label: "Diseño L3 (7.11)",
+            data: subtrenadas.map(() => 7.11),
+            borderColor: "orange",
+            borderWidth: 2,
+            type: "line",
+            fill: false
+          }
+        ]
+      },
+      options: {
+        plugins: { legend: { position: "bottom" } },
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: "Tasa de Carga (car/h)" } },
+          x: { title: { display: true, text: "Subtrenadas" } }
+        }
+      },
+      plugins: [mostrarValores]
+    });
+
+    new Chart(document.getElementById("tiempoChart"), {
+      type: "bar",
+      data: {
+        labels: subtrenadas,
+        datasets: [
+          {
+            label: "Aviso - Retiro (min)",
+            data: avisoRetiro.map(v => Math.round(v || 0)),
+            backgroundColor: "rgba(0, 150, 255, 0.7)"
+          },
+          {
+            label: "Retiro - Postura (min)",
+            data: avisoPostura.map(v => Math.round(v || 0)),
+            backgroundColor: "rgba(255, 150, 50, 0.8)"
+          }
+        ]
+      },
+      options: {
+        plugins: { legend: { position: "bottom" } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: "Tiempo (minutos)" },
+            ticks: {
+              stepSize: 1,
+              callback: (value) => Math.round(value)
+            }
+          },
+          x: { title: { display: true, text: "Subtrenadas" } }
+        }
+      },
+      plugins: [mostrarValores]
+    });
   </script>
 </body>
 </html>
