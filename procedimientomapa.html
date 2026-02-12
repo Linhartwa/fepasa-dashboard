@@ -44,11 +44,13 @@ button:hover {
     font-size: 18px;
     font-weight: bold;
     color: #c0392b;
+    text-align: center;
 }
 #result {
     margin-top:20px;
     font-size:22px;
     font-weight:bold;
+    text-align: center;
 }
 </style>
 </head>
@@ -64,16 +66,16 @@ button:hover {
 <p id="timer">Tiempo restante: 60:00</p>
 
 <div class="question">
-<label>Nombre:</label><br>
+<label><strong>Nombre:</strong></label><br>
 <input type="text" id="nombre"><br><br>
 
-<label>RUT (12345678-9):</label><br>
+<label><strong>RUT (12345678-9):</strong></label><br>
 <input type="text" id="rut"><br><br>
 
-<label>Cargo:</label><br>
+<label><strong>Cargo:</strong></label><br>
 <input type="text" id="cargo"><br><br>
 
-<label>Supervisor:</label><br>
+<label><strong>Supervisor:</strong></label><br>
 <input type="text" id="supervisor">
 </div>
 
@@ -87,8 +89,9 @@ button:hover {
 <script>
 
 // ===== CONFIGURACIÓN =====
-const API_URL = https://script.google.com/macros/s/AKfycbz2x1mLWqMOTAkyS69Kw1_aKw08RAtFABP1WoL50EOsJbKkHuaPHEE6jCqMcrTIPpjX/exec;
+const API_URL = "https://script.google.com/macros/s/AKfycbz2x1mLWqMOTAkyS69Kw1_aKw08RAtFABP1WoL50EOsJbKkHuaPHEE6jCqMcrTIPpjX/exec";
 const LIMITE_APROBACION = 80;
+let evaluacionFinalizada = false;
 
 // ===== TEMPORIZADOR 60 MIN =====
 let tiempo = 3600;
@@ -105,58 +108,58 @@ const timer = setInterval(()=>{
     }
 },1000);
 
-// ===== VALIDACIÓN RUT =====
+// ===== VALIDACIÓN RUT CHILENO =====
 function validarRut(rutCompleto){
     if(!/^[0-9]+-[0-9kK]{1}$/.test(rutCompleto)) return false;
-    let tmp=rutCompleto.split('-');
-    let digv=tmp[1].toLowerCase();
-    let rut=tmp[0];
-    return dv(rut)==digv;
+    let tmp = rutCompleto.split('-');
+    let digv = tmp[1].toLowerCase();
+    let rut = tmp[0];
+    return dv(rut) == digv;
 }
 function dv(T){
-    let M=0,S=1;
-    for(;T;T=Math.floor(T/10))
-        S=(S+T%10*(9-M++%6))%11;
-    return S?S-1:'k';
+    let M=0, S=1;
+    for(; T; T = Math.floor(T/10))
+        S = (S + T % 10 * (9 - M++ % 6)) % 11;
+    return S ? S - 1 : 'k';
 }
 
-// ===== 50 PREGUNTAS COMPLETAS =====
+// ===== 50 PREGUNTAS =====
 const preguntas = [
 {q:"¿Quién autoriza todas las rutas dentro de Planta?",o:["COS L3","Supervisor Patio","CCT MAPA","Jefe Serfocol"],a:2},
 {q:"La gobernanza del CCT MAPA inicia en:",o:["DVR1032","DVR1001","DVR801B","DVR1036"],a:1},
 {q:"Función principal del COS L3:",o:["Autorizar rutas","Apertura portones","Prueba freno","Armado tren"],a:1},
 {q:"LM significa:",o:["Línea Mayor","Límite Maniobra","Línea Madera","Límite Mecánico"],a:1},
 {q:"Máx bloqueo cruce SALFA:",o:["5 min","3 min","2 min","10 min"],a:1},
-{q:"Baliza roja Sendero la instala:",o:["Tripulación","CCT","Mantenimiento","COS"],a:2},
+{q:"Baliza roja Sendero la instala:",o:["Tripulación","CCT","Mantenimiento","COS"],a:1},
 {q:"Primera fracción vacíos se revisa:",o:["Apertura total","Visual sin abrir","Desmontaje","Desde cabina"],a:1},
-{q:"Carros rechazados L3 van a:",o:["BPT","VPC","VAQ","VTV"],a:2},
+{q:"Carros rechazados L3 van a:",o:["BPT","VPC","VAQ","VTV"],a:1},
 {q:"Responsable carguío BPT L3:",o:["Tripulación","CCT","Reloncaví","MTTO"],a:2},
-{q:"cual es el Máx carros ingreso BPT L2 en cada bodega:",o:["10","15","5","20"],a:2},
+{q:"¿Cuál es el máximo carros ingreso BPT L2 en cada bodega?",o:["10","15","5","20"],a:2},
 {q:"BPT Pacífico requiere:",o:["Ingreso libre","Carro protección","Volanda","Desacople externo"],a:1},
-{q:"Cuantos carros minimos considera una subtrenada en L2?:",o:["10","15","20","25"],a:2},
+{q:"Cuántos carros mínimos considera una subtrenada en L2?",o:["10","15","20","25"],a:2},
 {q:"Empuje L3→L2 inicia en:",o:["DVR1001","DVR801 A/B","DVR1021","DVR1032"],a:1},
-{q:"Quien es el responsable de la Protección en maniobras de empuje:",o:["CCT","Ayudante caminando","Supervisor","COS"],a:1},
-{q:"La Prueba freno la ejecuta:",o:["Maquinista","CCT","Mantenimiento","Serfocol"],a:2},
-{q:"Cual es la Velocidad romana en pesaje?:",o:["10","8","5","3"],a:2},
-{q:"Baliza encendida en Areas quimicas quiere decir que el carro esta:",o:["Desconectado","Conectado","Vacío","Bloqueado"],a:1},
+{q:"¿Quién es responsable de la protección en maniobras de empuje?",o:["CCT","Ayudante caminando","Supervisor","COS"],a:1},
+{q:"La prueba de freno la ejecuta:",o:["Maquinista","CCT","Mantenimiento","Serfocol"],a:2},
+{q:"Cuál es la velocidad romana en pesaje?",o:["10","8","5","3"],a:2},
+{q:"Baliza encendida en áreas químicas quiere decir que el carro está:",o:["Desconectado","Conectado","Vacío","Bloqueado"],a:1},
 {q:"Detector obligatorio química:",o:["CO2","H2S y ClO2","Metano","Oxígeno"],a:1},
 {q:"Máx carros D5 forestal:",o:["15","18","22","25"],a:2},
 {q:"Excedentes forestal se dejan en:",o:["VPC","VSC","D4","801B"],a:2},
 {q:"Locomotora 1800 empuje:",o:["Permitida","Prohibida","Solo L3","Solo doble"],a:1},
 {q:"Doble tracción requiere:",o:["Sin radio","Coordinación radial","Solo empuje","Sin freno"],a:1},
 {q:"Distancia mínima fraccionamiento:",o:["1m","1.5m","2m","3m"],a:2},
-{q:"Hombre en la Pisadera de los carros esta:",o:["Permitido","Prohibido","Solo L3","Solo L2"],a:1},
+{q:"Hombre en la pisadera de los carros está:",o:["Permitido","Prohibido","Solo L3","Solo L2"],a:1},
 {q:"Plazo entrega guías:",o:["10","20","30","60"],a:2},
 {q:"Doc químicos incluye:",o:["Solo guía","Guía+Check","Guía+Check+HDS","Solo HDS"],a:2},
 {q:"Cruce no bloquear más de:",o:["5 min","3 min","2 min","10 min"],a:1},
-{q:"el uso del telefono dentro de planta es :",o:["Libre","Solo redes","Solo previa coordinacion","Prohibido total"],a:2},
+{q:"El uso del teléfono dentro de planta es:",o:["Libre","Solo previa coordinación","Prohibido total","Solo redes"],a:1},
 {q:"Comer en química:",o:["Permitido","Prohibido","Solo cabina","Descanso"],a:1},
 {q:"Limpieza forestal estándar:",o:["Riel visible","Durmiente visible","Balasto visible","Cambio limpio"],a:1},
 {q:"Equipo estacionado debe quedar:",o:["Solo calza","Solo freno","Freno+calza+sin aire","Con loco"],a:2},
 {q:"Cruzarse sobre acoples:",o:["Permitido","Solo vacío","Prohibido","Con autorización"],a:2},
 {q:"Reparaciones en planta:",o:["Permitidas","Menores","Prohibidas","Solo L3"],a:2},
-{q:"Baliza apagada significa en Areas quimicas quiere decir:",o:["Conectado","Desconectado","Bloqueado","Rechazado"],a:1},
-{q:"Postura química L3:",o:["2 sodas","4 sodas 1 clorato","3 sodas","5 cloratos"],a:1},
+{q:"Baliza apagada en áreas químicas quiere decir:",o:["Conectado","Desconectado","Bloqueado","Rechazado"],a:1},
+{q:"Postura química L3:",o:["2 sodas","4 sodas + 1 clorato","3 sodas","5 cloratos"],a:1},
 {q:"Área petróleo verificar:",o:["Pintura","Camiones","Peso","Estiba"],a:1},
 {q:"Carros petróleo no deben tener:",o:["Óxido","Abolladuras","Goteo","Cortinas abiertas"],a:2},
 {q:"Salida ruta desde:",o:["DVR801","DVR1032→1001","DVR1036","DVR1021"],a:1},
@@ -166,80 +169,101 @@ const preguntas = [
 {q:"Sendero es sector de:",o:["Carga","Revisión","Descarga","Romana"],a:1},
 {q:"Armado mínimo L2:",o:["15","18","20","25"],a:2},
 {q:"Ruta salida incluye:",o:["1005","1001","801B","1021"],a:1},
-{q:"Tiempo evaluación:",o:["30","45","60","90"],a:2},
-{q:"Aprobación mínima:",o:["70","75","80","85"],a:2},
+{q:"Tiempo evaluación es:",o:["30 min","45 min","60 min","90 min"],a:2},
+{q:"Aprobación mínima es:",o:["70%","75%","80%","85%"],a:2},
 {q:"Baliza manipula:",o:["Tripulación","CCT","Operador área","Supervisor"],a:2},
 {q:"Empuje debe ser:",o:["Libre","Protegido caminando","Vehículo","Radial"],a:1},
-{q:"Gobernanza interna:",o:["COS","CCT MAPA","Supervisor","Reloncaví"],a:1}
+{q:"Gobernanza interna es función de:",o:["COS","CCT MAPA","Supervisor","Reloncaví"],a:1}
 ];
 
-// Aleatorizar
+// Aleatorizar preguntas
 preguntas.sort(()=>Math.random()-0.5);
 
-const form=document.getElementById("quizForm");
-preguntas.forEach((p,i)=>{
-    const div=document.createElement("div");
-    div.className="question";
-    div.innerHTML=`<p>${i+1}. ${p.q}</p>`+
-    p.o.map((opt,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label><br>`).join("");
+const form = document.getElementById("quizForm");
+preguntas.forEach((p,i) => {
+    const div = document.createElement("div");
+    div.className = "question";
+    div.innerHTML = `<p>${i+1}. ${p.q}</p>` +
+    p.o.map((opt,j) => 
+        `<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label><br>`
+    ).join("");
     form.appendChild(div);
 });
 
-// Resultado
+// Mostrar resultado
 function calcularResultado(){
 
-let nombre=document.getElementById("nombre").value;
-let rut=document.getElementById("rut").value;
-let cargo=document.getElementById("cargo").value;
-let supervisor=document.getElementById("supervisor").value;
+if(evaluacionFinalizada) return;
+evaluacionFinalizada = true;
+
+let nombre = document.getElementById("nombre").value;
+let rut = document.getElementById("rut").value;
+let cargo = document.getElementById("cargo").value;
+let supervisor = document.getElementById("supervisor").value;
 
 if(!nombre||!rut||!cargo||!supervisor){
 alert("Complete todos los datos");
+evaluacionFinalizada = false;
 return;
 }
 if(!validarRut(rut)){
 alert("RUT inválido");
+evaluacionFinalizada = false;
 return;
 }
 
 let puntaje=0;
-preguntas.forEach((p,i)=>{
-let r=document.querySelector(`input[name="q${i}"]:checked`);
-if(r && parseInt(r.value)===p.a) puntaje+=2;
+preguntas.forEach((p,i) => {
+let r = document.querySelector(`input[name="q${i}"]:checked`);
+if(r && parseInt(r.value)===p.a) puntaje += 2;
 });
 
-let estado=puntaje>=LIMITE_APROBACION?"APROBADO":"REPROBADO";
+let estado = puntaje >= LIMITE_APROBACION ? "APROBADO" : "REPROBADO";
 
 fetch(API_URL,{
 method:"POST",
-body:JSON.stringify({
-nombre:nombre,
-rut:rut,
-cargo:cargo,
-supervisor:supervisor,
-puntaje:puntaje,
-tiempo:3600-tiempo
+body: JSON.stringify({
+nombre: nombre,
+rut: rut,
+cargo: cargo,
+supervisor: supervisor,
+puntaje: puntaje,
+tiempo: 3600 - tiempo
 })
-});
+})
+.then(r=>r.text())
+.then(respuesta=>{
+    if(respuesta==="LIMITE"){
+        alert("Máximo 3 intentos por día alcanzado");
+        document.getElementById("result").innerHTML="";
+        evaluacionFinalizada = false;
+        return;
+    }
+    document.getElementById("result").innerHTML =
+    `Puntaje: ${puntaje}/100 - ${estado}`;
 
-document.getElementById("result").innerHTML=
-`Puntaje: ${puntaje}/100 - ${estado}`;
-
-if(estado==="APROBADO"){
-let contenido=`CERTIFICADO OFICIAL FEPASA
+    if(estado==="APROBADO"){
+        let contenido = `CERTIFICADO OFICIAL FEPASA
 ${nombre}
 RUT: ${rut}
 Aprobó Certificación Maniobras L2-L3
 Puntaje: ${puntaje}/100
 Fecha: ${new Date().toLocaleDateString()}`;
-let blob=new Blob([contenido],{type:"application/pdf"});
-let link=document.createElement("a");
-link.href=URL.createObjectURL(blob);
-link.download="Certificado_FEPASA_L2L3.pdf";
-link.click();
-}
+        let blob = new Blob([contenido],{type:"application/pdf"});
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download="Certificado_FEPASA_L2L3.pdf";
+        link.click();
+    }
+})
+.catch(()=>{
+    alert("Error enviando datos.");
+    evaluacionFinalizada = false;
+});
+
 }
 
 </script>
+
 </body>
 </html>
