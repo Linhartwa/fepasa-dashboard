@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Evaluación Procedimiento Maniobras L2–L3</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 20px;
+}
+h1 {
+    text-align: center;
+}
+.question {
+    background: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-top: 20px;
+}
+#result {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+}
+.aprobado {
+    color: green;
+}
+.reprobado {
+    color: red;
+}
+</style>
+</head>
+<body>
+
+<h1>Evaluación Procedimiento Maniobras CFI Horcones L2–L3</h1>
+
+<form id="quizForm"></form>
+
+<button onclick="calcularResultado()">Finalizar Evaluación</button>
+<button onclick="location.reload()">Reiniciar</button>
+
+<div id="result"></div>
+
+<script>
+
+const preguntas = [
+{q:"1. ¿Quién autoriza todas las rutas dentro de Planta?",
+ options:["COS L3","Supervisor Patio","CCT MAPA","Jefe Serfocol"], answer:2},
+{q:"2. La gobernanza del CCT MAPA inicia en:",
+ options:["DVR 1032","DVR 1001","DVR 801B","DVR 1036"], answer:1},
+{q:"3. Función principal del COS L3:",
+ options:["Autorizar rutas","Apertura y cierre portones","Prueba freno","Armado tren"], answer:1},
+{q:"4. LM significa:",
+ options:["Línea Mayor","Límite Maniobra","Línea Madera","Límite Mecánico"], answer:1},
+{q:"5. Antes de maniobra se debe:",
+ options:["Avisar Serfocol","Revisión visual","Llamar MTTO","Solicitar guías"], answer:1},
+{q:"6. Baliza roja en Sendero la instala:",
+ options:["Tripulación","CCT","Mantenimiento","COS"], answer:2},
+{q:"7. Primera fracción vacíos revisión:",
+ options:["Apertura total","Visual sin abrir cortinas","Desmontaje","Desde cabina"], answer:1},
+{q:"8. Carros rechazados L3 se dejan en:",
+ options:["BPT","VPC","VAQ a gálibo","VTV"], answer:2},
+{q:"9. Responsable carguío BPT L3:",
+ options:["Tripulación","CCT","Reloncaví","MTTO"], answer:2},
+{q:"10. Máx carros ingreso BPT L2:",
+ options:["10","15","5","20"], answer:2},
+{q:"11. En BPT Pacífico es obligatorio:",
+ options:["Libre ingreso","Carro protección","Volanda","Desacople externo"], answer:1},
+{q:"12. Tripulación puede retirar cadenas:",
+ options:["Siempre","Solo Andes","Nunca","Con CCT"], answer:2},
+{q:"13. Subtrenada mínima:",
+ options:["10","15","20","25"], answer:2},
+{q:"14. Carros armados deben quedar:",
+ options:["Solo freno","Solo aire","Freno+calza+sin aire","Con loco"], answer:2},
+{q:"15. Empuje L3→L2 inicia en:",
+ options:["DVR1001","DVR801 A/B","DVR1021","DVR1032"], answer:1},
+{q:"16. Protección última pieza:",
+ options:["CCT","COS","Ayudante caminando","Supervisor"], answer:2},
+{q:"17. Prueba freno la ejecuta:",
+ options:["Maquinista","CCT","Mantenimiento","Serfocol"], answer:2},
+{q:"18. Antes prueba se instalan:",
+ options:["Calzas","Balizas protección","Cortinas","Guías"], answer:1},
+{q:"19. Firma conformidad:",
+ options:["COS","Operador","Maquinista","CCT"], answer:2},
+{q:"20. Velocidad romana:",
+ options:["10","8","5","3"], answer:2},
+{q:"21. Baliza encendida:",
+ options:["Desconectado","Conectado","Vacío","Bloqueado"], answer:1},
+{q:"22. Baliza apagada:",
+ options:["Conectado","Desconectado","Bloqueado","Rechazado"], answer:1},
+{q:"23. Manipula baliza:",
+ options:["Tripulación","CCT","Operador Química","Supervisor"], answer:2},
+{q:"24. Detector obligatorio:",
+ options:["CO2","H2S y ClO2","Metano","Oxígeno"], answer:1},
+{q:"25. Postura L3 químicos:",
+ options:["2 sodas","4 sodas y 1 clorato","3 sodas","5 cloratos"], answer:1},
+{q:"26. Verificar antes petróleo:",
+ options:["Pintura","Camiones descarga","Peso","Estiba"], answer:1},
+{q:"27. Carros petróleo no deben presentar:",
+ options:["Óxido","Abolladuras","Goteo","Cortinas abiertas"], answer:2},
+{q:"28. Máx D5 forestal:",
+ options:["15","18","22","25"], answer:2},
+{q:"29. Excedente forestal:",
+ options:["VPC","VSC","D4","801B"], answer:2},
+{q:"30. Locomotora 1800 empuje:",
+ options:["Permitida","Prohibida","Solo L3","Solo doble"], answer:1},
+{q:"31. Doble tracción requiere:",
+ options:["Sin radio","Coordinación radial","Solo empuje","Sin freno"], answer:1},
+{q:"32. Distancia mínima carros:",
+ options:["1m","1.5m","2m","3m"], answer:2},
+{q:"33. Pisadera empuje:",
+ options:["Permitido","Prohibido","Solo L3","Solo L2"], answer:1},
+{q:"34. Antes mover equipo:",
+ options:["Avisar COS","Retirar calzas","Abrir cortinas","Llamar MTTO"], answer:1},
+{q:"35. Plazo guías:",
+ options:["10","20","30","60"], answer:2},
+{q:"36. Doc químicos:",
+ options:["Solo guía","Guía+Check","Guía+Check+HDS","Solo HDS"], answer:2},
+{q:"37. Cruce SALFA máx:",
+ options:["5","3","2","10"], answer:1},
+{q:"38. Celular zona:",
+ options:["Libre","Redes","Solo coordinaciones","Siempre prohibido"], answer:2},
+{q:"39. Comer en química:",
+ options:["Permitido","Prohibido","Solo cabina","Descanso"], answer:1},
+{q:"40. Limpieza estándar:",
+ options:["Riel visible","Durmiente visible","Balasto visible","Cambio limpio"], answer:1},
+{q:"41. Armado químico vacío:",
+ options:["BPT","811-1030 o 1029-1031","Sendero","D5"], answer:1},
+{q:"42. Salida ruta:",
+ options:["DVR801","DVR1032→1001","DVR1036","DVR1021"], answer:1},
+{q:"43. Si no entiende instrucción:",
+ options:["Ejecutar","Confirmar","Esperar","Delegar"], answer:1},
+{q:"44. Equipo estacionado:",
+ options:["Solo calza","Solo freno","Freno+calza+sin aire","Con loco"], answer:2},
+{q:"45. Cruzar acoples:",
+ options:["Sí","Solo vacío","No","Con autorización"], answer:2},
+{q:"46. Empuje debe ser:",
+ options:["Sin protección","Protegido caminando","Vehículo","Radial"], answer:1},
+{q:"47. Reparaciones planta:",
+ options:["Permitidas","Menores","Prohibidas","Solo L3"], answer:2},
+{q:"48. Responsable armado final:",
+ options:["COS","CCT MAPA","Serfocol","Reloncaví"], answer:1},
+{q:"49. Área química requiere:",
+ options:["Solo casco","Detector+mascarilla","Solo chaleco","Antiparras"], answer:1},
+{q:"50. Puntaje total examen:",
+ options:["50","80","100","120"], answer:2},
+];
+
+const form = document.getElementById("quizForm");
+
+preguntas.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "question";
+    div.innerHTML = `<p>${item.q}</p>` +
+    item.options.map((opt,i)=> 
+        `<label><input type="radio" name="q${index}" value="${i}"> ${opt}</label><br>`
+    ).join("");
+    form.appendChild(div);
+});
+
+function calcularResultado(){
+    let puntaje = 0;
+    preguntas.forEach((item,index)=>{
+        const respuesta = document.querySelector(`input[name="q${index}"]:checked`);
+        if(respuesta && parseInt(respuesta.value) === item.answer){
+            puntaje += 2;
+        }
+    });
+
+    const resultado = document.getElementById("result");
+    let estado = puntaje >= 80 ? "APROBADO" : "REPROBADO";
+    resultado.innerHTML = `Puntaje: ${puntaje}/100 - ${estado}`;
+    resultado.className = puntaje >= 80 ? "aprobado" : "reprobado";
+}
+
+</script>
+
+</body>
+</html>
